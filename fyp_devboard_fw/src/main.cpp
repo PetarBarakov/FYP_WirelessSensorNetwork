@@ -1,6 +1,4 @@
-#include "Arduino.h"
-#include "Wire.h"
-
+#include <header.h>
 
 #define pinSDA 6 
 #define pinSCL 7 
