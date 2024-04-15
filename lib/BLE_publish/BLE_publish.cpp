@@ -45,11 +45,11 @@ void publisherBLE::BLEinit()
     BLEDevice::startAdvertising();
 }
 
-void publisherBLE::BLEsendValue(int transmitValue)
+void publisherBLE::BLEsendValue(char* transmitValue)
 {
     if (Callbacks_handle->deviceConnected) {
-        pCharacteristic->setValue((uint8_t*)&transmitValue, 4);
-        Serial.printf("The transmitted values is: %02X\n", transmitValue);
+        pCharacteristic->setValue(transmitValue);
+        Serial.printf("The transmitted values is: %s.\n", transmitValue);
         pCharacteristic->notify();
     }
     // disconnecting

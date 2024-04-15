@@ -39,7 +39,7 @@ class publisherBLE{
 
     publisherBLE(char* setupName);
     void BLEinit();
-    void BLEsendValue(int transmitValue);
+    void BLEsendValue(char* transmitValue);
 
 };
 

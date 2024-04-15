@@ -13,10 +13,10 @@ void setup() {
 void loop() {
   // I2CSearchAddr();
 
-  static int value = 0;
+  // static int value = 0;
+  char value [] = "Temp: 7";
 
   node1BLE.BLEsendValue(value);
-  value++;
 
   delay(1000);
 }
