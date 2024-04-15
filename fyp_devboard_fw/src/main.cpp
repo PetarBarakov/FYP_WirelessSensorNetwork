@@ -1,16 +1,22 @@
-#include <header.h>
+#include "header.h"
 
-#define pinSDA 6 
-#define pinSCL 7 
-
-#define LED1 4
+publisherBLE node1BLE("FYP_SensorNode0");
 
 void setup() {
   Serial.begin(115200);
 
   I2CSearchInit();
+
+  node1BLE.BLEinit();
 }
 
 void loop() {
-  I2CSearchAddr();
+  // I2CSearchAddr();
+
+  static int value = 0;
+
+  node1BLE.BLEsendValue(value);
+  value++;
+
+  delay(1000);
 }

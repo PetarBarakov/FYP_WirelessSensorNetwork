@@ -1,9 +1,6 @@
-// #ifndef I2C_test.h
-// #define I2C_test.h
-
 #include <Arduino.h>
 #include <Wire.h>
-#include <I2C_test.h>
+#include "I2C_test.h"
 
 void I2CSearchInit()
 {
@@ -15,13 +12,13 @@ void I2CSearchInit()
 
 void I2CSearchAddr()
 {
-     byte error, address;
+  byte error, address;
   int nDevices = 0;
 
-  digitalWrite(LED1, HIGH);
-  delay(1000);
-  digitalWrite(LED1, LOW);
-  delay(1000);
+  // digitalWrite(LED1, HIGH);
+  // delay(500);
+  // digitalWrite(LED1, LOW);
+  // delay(500);
 
   Serial.println("Scanning for I2C devices (using I2C_test library) ...");
   for(address = 0x01; address < 0x7f; address++){
@@ -38,5 +35,3 @@ void I2CSearchAddr()
     Serial.println("No I2C devices found");
   }
 }
-
-// #endif

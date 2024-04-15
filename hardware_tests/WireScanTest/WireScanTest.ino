@@ -56,7 +56,7 @@ void setup()
 
 void loop()
 {
-  Serial.println("KUR");
+  Serial.println("yep");
   delay(500);
   digitalWrite(LED1, HIGH);
   delay(1000);
