@@ -34,6 +34,16 @@ void Sensor::writeSensorBytes(uint8_t* txBytes, uint8_t numBytes)
     Wire.endTransmission();
 }
 
+void Sensor::writeToReg(uint8_t regAddr, uint8_t byteValue)
+{
+    Wire.beginTransmission(address);
+
+    Wire.write(regAddr);
+    Wire.write(byteValue);
+
+    Wire.endTransmission();
+}
+
 void Sensor::writeSensor1Byte(uint8_t txByte)
 {
     Wire.beginTransmission(address);

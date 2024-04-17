@@ -17,6 +17,7 @@ class Sensor{
     void readSensorBytes(uint8_t* rxBytes, uint8_t numBytes);
     void writeSensorBytes(uint8_t* txBytes, uint8_t numBytes);
     void writeSensor1Byte(uint8_t txByte);
+    void writeToReg(uint8_t regAddr, uint8_t byteValue);
     uint8_t address;
     
 };
