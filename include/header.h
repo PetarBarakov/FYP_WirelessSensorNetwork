@@ -4,4 +4,5 @@
 #include "I2C_test.h"
 #include "BLE_publish.h"
 
-// #include <SensorClass.h>
+#include "SensorClass.h"
+#include "SHT40.h"
