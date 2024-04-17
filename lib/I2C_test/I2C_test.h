@@ -5,7 +5,7 @@
 #define pinSCL 7 
 #define LED1 4
 
-void I2CSearchInit();
+void I2CSearchInit(); //Use if the I2C line has not been initialised
 
 void I2CSearchAddr();
 

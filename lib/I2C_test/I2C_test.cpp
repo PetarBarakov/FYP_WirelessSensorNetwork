@@ -7,7 +7,7 @@ void I2CSearchInit()
     Wire.setPins(pinSDA, pinSCL);
     Wire.begin();
 
-    pinMode(LED1, OUTPUT);
+    // pinMode(LED1, OUTPUT); //include for LED indication
 }
 
 void I2CSearchAddr()
@@ -15,6 +15,7 @@ void I2CSearchAddr()
   byte error, address;
   int nDevices = 0;
 
+  // CAREFUL: Including an LED indication causes a significant delay
   // digitalWrite(LED1, HIGH);
   // delay(500);
   // digitalWrite(LED1, LOW);
