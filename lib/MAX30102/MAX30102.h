@@ -44,7 +44,7 @@ class MAX30102 : public Sensor
     void HRread();  
 
     private:
-    void readFIFO();
+    // void readFIFO();
     void clearFIFO();
 
     //Configiration functions

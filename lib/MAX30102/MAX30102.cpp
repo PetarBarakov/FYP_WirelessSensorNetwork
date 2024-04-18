@@ -153,3 +153,20 @@ void MAX30102::clearFIFO()
     writeToReg(FIFO_RD_PTR, 0x00);
     writeToReg(FIFO_OVF_COUNTER, 0x00);
 }
+
+void MAX30102::SPO2read()
+{
+    modeConfig(1); //Force the sensor into SpO2 mode 
+
+    //TODO:
+    //read rd and wr pointers.
+    //read .
+
+    //one sample read in Sp02
+    uint8_t rxBuffer [6];s
+
+    readSensorBytes(rxBuffer, 6);
+
+    uint8_t redSampleRaw [3] = {rxBuffer[0], rxBuffer[1], rxBuffer[2]};
+    uint8_t irSampleRaw [3] = {rxBuffer[3], rxBuffer[4], rxBuffer[5]};
+}
