@@ -19,11 +19,11 @@
 #define FIFO_DATA 0x07
 
 // Main Configuration Register Addresses
-#define FIFO_CONFIG 0x08
-#define MODE_CONFIG 0x09
-#define SPO2_CONFIG 0x0A
-#define LED1_PA 0x0C    //RED LED
-#define LED2_PA 0x0D    //IR LED
+#define FIFO_CONFIG_REG 0x08
+#define MODE_CONFIG_REG 0x09
+#define SPO2_CONFIG_REG 0x0A
+#define LED1_PA_REG 0x0C    //RED LED
+#define LED2_PA_REG 0x0D    //IR LED
 
 
 
@@ -31,7 +31,14 @@
 class MAX30102 : public Sensor
 {
     public:
-    MAX30102(uint8_t sensorAddress, uint8_t sampleAverage, uint8_t mode);
+    MAX30102(   uint8_t sensorAddress,
+                uint8_t sampleAverage,
+                uint8_t mode,
+                uint8_t typCurrent,
+                uint8_t SpO2ADCRange,
+                uint8_t SpO2SampleRate,
+                uint8_t SpO2PulseWidth
+                );
 
     void SPO2read();
     void HRread();  
@@ -43,6 +50,8 @@ class MAX30102 : public Sensor
     //Configiration functions
     void fifoConfig(uint8_t sampleAverage);
     void modeConfig(uint8_t mode);
+    void ledCurrentConfig(uint8_t typCurrent);
+    void SpO2Config(uint8_t SpO2ADCRange, uint8_t SpO2SampleRate, uint8_t SpO2PulseWidth);
 
 };
 

@@ -6,3 +6,4 @@
 
 #include "SensorClass.h"
 #include "SHT40.h"
+#include "MAX30102.h"
