@@ -75,8 +75,10 @@ void MAX30102::modeConfig(uint8_t mode)
 
 void MAX30102::ledCurrentConfig(uint8_t typCurrent)
 {
-    /*The 1 byte register value can be found with the following formula;
+    /*The 1 byte register value can be found with the following formula:
     regCurrent = typCurrent / 0.2;
+
+    Input value needs to be between 0.2 and 51 mA
     */
 
     uint8_t ledRegCurrentByte = typCurrent / 0.2;
@@ -156,17 +158,44 @@ void MAX30102::clearFIFO()
 
 void MAX30102::SPO2read()
 {
-    modeConfig(1); //Force the sensor into SpO2 mode 
+    // modeConfig(1); //Force the sensor into SpO2 mode 
+    // ledCurrentConfig(12);
 
-    //TODO:
-    //read rd and wr pointers.
-    //read .
+    uint8_t rdPointer, wrPointer;
 
-    //one sample read in Sp02
-    uint8_t rxBuffer [6];s
+    writeSensor1Byte(FIFO_RD_PTR);
+    readSensorBytes(&rdPointer, 1);
 
-    readSensorBytes(rxBuffer, 6);
+    writeSensor1Byte(FIFO_WR_PTR);
+    readSensorBytes(&wrPointer, 1);
 
-    uint8_t redSampleRaw [3] = {rxBuffer[0], rxBuffer[1], rxBuffer[2]};
-    uint8_t irSampleRaw [3] = {rxBuffer[3], rxBuffer[4], rxBuffer[5]};
+    uint8_t numSamples = 0;
+
+    if(rdPointer <= wrPointer) numSamples = wrPointer - rdPointer;
+    else numSamples = 32 - (wrPointer - rdPointer);
+    
+    if(numSamples == 0) Serial.println("No samples in the FIFO");
+
+    Serial.printf("Write pointer %01X\n", wrPointer);
+    Serial.printf("Read pointer %01X\n", rdPointer);
+
+    while (numSamples > 0)
+    {
+        // Serial.printf("Num of samples %f\n", numSamples);  
+        numSamples --;
+
+        //one sample read in Sp02 mode
+        uint8_t rxBuffer [6];
+    
+        writeSensor1Byte(FIFO_DATA);
+        readSensorBytes(rxBuffer, 6);
+
+        // uint8_t redSampleRaw [3] = {rxBuffer[0], rxBuffer[1], rxBuffer[2]};
+        // uint8_t irSampleRaw [3] = {rxBuffer[3], rxBuffer[4], rxBuffer[5]};
+        uint32_t redSampleRaw = 65536 * rxBuffer[0] + 256 * rxBuffer[1] + rxBuffer[2];
+        uint32_t irSampleRaw =  65536 * rxBuffer[3] + 256 * rxBuffer[4] + rxBuffer[5];
+
+        Serial.printf("Red LED reading: %06X \t The IR LED reading: %06X\n", redSampleRaw, irSampleRaw);
+    }
+
 }

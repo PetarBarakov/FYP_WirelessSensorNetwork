@@ -25,7 +25,7 @@
 #define LED1_PA_REG 0x0C    //RED LED
 #define LED2_PA_REG 0x0D    //IR LED
 
-
+#define FIFO_LENGTH 32
 
 
 class MAX30102 : public Sensor
@@ -41,11 +41,11 @@ class MAX30102 : public Sensor
                 );
 
     void SPO2read();
-    void HRread();  
+    // void HRread();  
 
+    void clearFIFO();
     private:
     // void readFIFO();
-    void clearFIFO();
 
     //Configiration functions
     void fifoConfig(uint8_t sampleAverage);
