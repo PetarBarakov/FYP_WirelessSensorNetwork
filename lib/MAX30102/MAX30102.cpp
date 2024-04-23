@@ -1,6 +1,6 @@
 #include "MAX30102.h"
 
-void MAX30102::fifoConfig(uint8_t sampleAverage)
+void MAX30102::fifoConfig()
 {
     //Setup the FIFO configuration
 
@@ -53,7 +53,7 @@ void MAX30102::fifoConfig(uint8_t sampleAverage)
     writeToReg(FIFO_CONFIG_REG, fifoConfigBits);
 }
 
-void MAX30102::modeConfig(uint8_t mode)
+void MAX30102::modeConfig()
 {
     //Setup the mode of measurements
 
@@ -73,7 +73,7 @@ void MAX30102::modeConfig(uint8_t mode)
 
 }
 
-void MAX30102::ledCurrentConfig(uint8_t typCurrent)
+void MAX30102::ledCurrentConfig()
 {
     /*The 1 byte register value can be found with the following formula:
     regCurrent = typCurrent / 0.2;
@@ -87,7 +87,7 @@ void MAX30102::ledCurrentConfig(uint8_t typCurrent)
 
 }
 
-void MAX30102::SpO2Config(uint8_t SpO2ADCRange, uint8_t SpO2SampleRate, uint8_t SpO2PulseWidth)
+void MAX30102::SpO2Config()
 {
     //The ADC Range has values from 0 to 3, increasing in the LSB size in terms of drawn current
     
@@ -132,19 +132,26 @@ void MAX30102::SpO2Config(uint8_t SpO2ADCRange, uint8_t SpO2SampleRate, uint8_t 
 
 }
 
-MAX30102::MAX30102 (uint8_t sensorAddress,
-                    uint8_t sampleAverage,
-                    uint8_t mode,
-                    uint8_t typCurrent,
-                    uint8_t SpO2ADCRange,
-                    uint8_t SpO2SampleRate,
-                    uint8_t SpO2PulseWidth
-                    ) : Sensor(sensorAddress)
+MAX30102::MAX30102 (uint8_t PPG_sensorAddress,
+                    uint8_t PPG_sampleAverage,
+                    uint8_t PPG_mode,
+                    uint8_t PPG_typCurrent,
+                    uint8_t PPG_SpO2ADCRange,
+                    uint8_t PPG_SpO2SampleRate,
+                    uint8_t PPG_SpO2PulseWidth
+                    ) : Sensor(PPG_sensorAddress)
 {
-    fifoConfig(sampleAverage);      //In number of samples between 1 and 32
-    modeConfig(mode);               //Mode 0: Heart Rate, Mode 1: SpO2, Mode 2: Multi-LED  
-    ledCurrentConfig(typCurrent);   //The typical currnet should be im mA
-    SpO2Config(SpO2ADCRange, SpO2SampleRate, SpO2PulseWidth);
+    sampleAverage = PPG_sampleAverage;
+    mode = PPG_mode;
+    typCurrent = PPG_typCurrent;
+    SpO2ADCRange = PPG_SpO2ADCRange;
+    SpO2SampleRate = PPG_SpO2SampleRate;
+    SpO2PulseWidth = PPG_SpO2PulseWidth;
+
+    fifoConfig();      //In number of samples between 1 and 32
+    modeConfig();               //Mode 0: Heart Rate, Mode 1: SpO2, Mode 2: Multi-LED  
+    ledCurrentConfig();   //The typical currnet should be im mA
+    SpO2Config();
 }
 
 void MAX30102::clearFIFO()
@@ -156,10 +163,22 @@ void MAX30102::clearFIFO()
     writeToReg(FIFO_OVF_COUNTER, 0x00);
 }
 
-void MAX30102::SPO2read()
+void MAX30102::readStatus()
+{  
+    Serial.printf("------ Control Vairables -----\n");
+    Serial.printf("The sample average is %d samples\n", sampleAverage);
+    Serial.printf("The Mode is %d \n", mode);
+    Serial.printf("The LED current is %d mA\n", typCurrent);
+   
+   //TODO: read directly from the registers to see what has been actually programmed
+}
+
+void MAX30102::rawSpO2Read(uint32_t& redSampleRaw, uint32_t& irSampleRaw)
 {
-    // modeConfig(1); //Force the sensor into SpO2 mode 
-    // ledCurrentConfig(12);
+    // fifoConfig();
+    modeConfig();
+    ledCurrentConfig();
+    // SpO2Config();
 
     uint8_t rdPointer, wrPointer;
 
@@ -176,8 +195,8 @@ void MAX30102::SPO2read()
     
     if(numSamples == 0) Serial.println("No samples in the FIFO");
 
-    Serial.printf("Write pointer %01X\n", wrPointer);
-    Serial.printf("Read pointer %01X\n", rdPointer);
+    // Serial.printf("Write pointer %01X\n", wrPointer);
+    // Serial.printf("Read pointer %01X\n", rdPointer);
 
     while (numSamples > 0)
     {
@@ -192,10 +211,22 @@ void MAX30102::SPO2read()
 
         // uint8_t redSampleRaw [3] = {rxBuffer[0], rxBuffer[1], rxBuffer[2]};
         // uint8_t irSampleRaw [3] = {rxBuffer[3], rxBuffer[4], rxBuffer[5]};
-        uint32_t redSampleRaw = 65536 * rxBuffer[0] + 256 * rxBuffer[1] + rxBuffer[2];
-        uint32_t irSampleRaw =  65536 * rxBuffer[3] + 256 * rxBuffer[4] + rxBuffer[5];
+        redSampleRaw = 65536 * rxBuffer[0] + 256 * rxBuffer[1] + rxBuffer[2];
+        irSampleRaw =  65536 * rxBuffer[3] + 256 * rxBuffer[4] + rxBuffer[5];
 
-        Serial.printf("Red LED reading: %06X \t The IR LED reading: %06X\n", redSampleRaw, irSampleRaw);
     }
 
+}
+
+void MAX30102::SpO2read()
+{   
+    uint32_t redSampleRaw = 0;
+    uint32_t irSampleRaw = 0;
+
+    rawSpO2Read(redSampleRaw, irSampleRaw);
+
+    // Serial.printf("Red LED reading: %06X \t The IR LED reading: %06X\n", redSampleRaw, irSampleRaw);
+    // Serial.printf("Red LED reading: %d \t The IR LED reading: %d\n", redSampleRaw, irSampleRaw);
+
+    Serial.printf("Red: %d \t IR: %d\n", redSampleRaw, irSampleRaw);
 }

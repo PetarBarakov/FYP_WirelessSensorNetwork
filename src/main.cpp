@@ -17,7 +17,7 @@ MAX30102 PPGSensor( MAX30102_ADDRESS, //sensorAddress
                     8,                //sampleAverage
                     1,                //mode
                     12,                //typCurrent
-                    0b10,             //SpO2ADCRange in bits
+                    0b10,             //SpO2ADCRange corresponding to bits
                     800,              //SpO2SampleRate
                     18                //SpO2PulseWidth
                     );  
@@ -52,9 +52,10 @@ void loop() {
 
   // Serial.printf("The temperature is: %f \t The humidity is: %f\n", temp, rh);
   
-  PPGSensor.SPO2read();
+  PPGSensor.SpO2read();
+  // PPGSensor.readStatus();
 
   
   
-  delay(2000);
+  delay(20);
 }
