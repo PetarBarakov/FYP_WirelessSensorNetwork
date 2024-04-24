@@ -31,36 +31,31 @@
 class MAX30102 : public Sensor
 {
     public:
-    MAX30102(   uint8_t PPG_sensorAddress,
-                uint8_t PPG_sampleAverage,
-                uint8_t PPG_mode,
-                uint8_t PPG_typCurrent,
-                uint8_t PPG_SpO2ADCRange,
-                uint8_t PPG_SpO2SampleRate,
-                uint8_t PPG_SpO2PulseWidth
-                );
+    MAX30102 (uint8_t sensorAddress);
 
-    void SpO2read();
+    void init ( uint8_t sampleAverage,
+                uint8_t mode,
+                uint8_t typCurrent,
+                uint8_t SpO2ADCRange,
+                uint16_t SpO2SampleRate,
+                uint8_t SpO2PulseWidth
+              );
+
+    void SpO2read(uint32_t *redSampleBuffer, uint32_t *irSampleBuffer, uint8_t &usedBuffer);
     // void HRread();  
 
     void clearFIFO();
+    void reset();
     void readStatus();
 
     private:
-    void rawSpO2Read(uint32_t& redSampleRaw, uint32_t& irSampleRaw);
+    void rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_t &usedBuffer);
 
     //Configiration functions
-    void fifoConfig();
-    void modeConfig();
-    void ledCurrentConfig();
-    void SpO2Config();
-
-    uint8_t sampleAverage;
-    uint8_t mode;
-    uint8_t typCurrent;
-    uint8_t SpO2ADCRange;
-    uint8_t SpO2SampleRate;
-    uint8_t SpO2PulseWidth;
+    void fifoConfig(uint8_t sampleAverage);
+    void modeConfig(uint8_t mode);
+    void ledCurrentConfig(uint8_t typCurrent);
+    void SpO2Config(uint8_t SpO2ADCRange, uint16_t SpO2SampleRate, uint8_t SpO2PulseWidth);
 
 };
 

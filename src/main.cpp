@@ -13,15 +13,7 @@
 SHT40 TRHSensor(SHT40_ADDRESS); //Intialise an object to the temperature and relative humidity sensor
 
 //Initialise an object for the PPG sensor
-MAX30102 PPGSensor( MAX30102_ADDRESS, //sensorAddress
-                    8,                //sampleAverage
-                    1,                //mode
-                    12,                //typCurrent
-                    0b10,             //SpO2ADCRange corresponding to bits
-                    800,              //SpO2SampleRate
-                    18                //SpO2PulseWidth
-                    );  
-
+MAX30102 PPGSensor(MAX30102_ADDRESS);
 
 void setup() {
   //Initialise Serial communication
@@ -30,6 +22,14 @@ void setup() {
   //Initialise I2C communication
   Wire.setPins(pinSDA, pinSCL);
   Wire.begin();
+
+  PPGSensor.init( (uint8_t) 8,                //sampleAverage
+                  (uint8_t) 1,                //mode
+                  (uint8_t) 12,                //typCurrent
+                  (uint8_t) 0b10,             //SpO2ADCRange corresponding to bits
+                  (uint16_t) 800,              //SpO2SampleRate
+                  (uint8_t) 18                //SpO2PulseWidth
+                );  
 
   // I2CSearchInit();
 
@@ -49,13 +49,19 @@ void loop() {
   // double temp, rh;
 
   // TRHSensor.readTempHumid(temp, rh);
+  uint32_t redSampleBuffer [32];
+  uint32_t irSampleBuffer [32];
+  uint8_t userBuffer;
+  
+  PPGSensor.SpO2read(redSampleBuffer, irSampleBuffer, userBuffer);
 
-  // Serial.printf("The temperature is: %f \t The humidity is: %f\n", temp, rh);
-  
-  PPGSensor.SpO2read();
-  // PPGSensor.readStatus();
 
+  for(uint8_t i = 0; i < userBuffer; i++)
+  {
+    Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
+  }
   
-  
-  delay(20);
+  Serial.println("....................");
+  // Serial.printf("Number of samples: %d\n", userBuffer);
+  delay(2000);
 }
