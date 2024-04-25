@@ -114,6 +114,8 @@ void MAX30102::SpO2Config(uint8_t SpO2ADCRange, uint16_t SpO2SampleRate, uint8_t
         0b11        -->         18 bits
     */
 
+   //TODO: check the sample rate and pulse width ratio from the datasheet again
+
     uint8_t sampleRateBits  = 0b100;    //Default sample rate of 800 samples per second
     
     uint16_t sampleRateLookUp [8] = {50, 100, 200, 400, 800, 1000, 1600, 3200};
@@ -133,7 +135,6 @@ void MAX30102::SpO2Config(uint8_t SpO2ADCRange, uint16_t SpO2SampleRate, uint8_t
     uint8_t regBuffer = pulseWidthBits + 4 * sampleRateBits + 32 * SpO2ADCRange;
 
     writeToReg(SPO2_CONFIG_REG, regBuffer);
-
 
 }
 
@@ -250,7 +251,7 @@ void MAX30102::rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_
 void MAX30102::SpO2read(uint32_t *redSampleBuffer, uint32_t *irSampleBuffer, uint8_t &usedBuffer)
 {   
 
-    readStatus();
+    // readStatus();
     rawSpO2Read(redSampleBuffer, irSampleBuffer, usedBuffer);
 
     //TODO: Sample conversion

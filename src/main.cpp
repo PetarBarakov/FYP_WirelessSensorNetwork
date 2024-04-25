@@ -23,11 +23,13 @@ void setup() {
   Wire.setPins(pinSDA, pinSCL);
   Wire.begin();
 
+  delay(5000);
+
   PPGSensor.init( (uint8_t) 8,                //sampleAverage
                   (uint8_t) 1,                //mode
                   (uint8_t) 12,                //typCurrent
                   (uint8_t) 0b10,             //SpO2ADCRange corresponding to bits
-                  (uint16_t) 800,              //SpO2SampleRate
+                  (uint16_t) 100,              //SpO2SampleRate
                   (uint8_t) 18                //SpO2PulseWidth
                 );  
 
@@ -61,7 +63,7 @@ void loop() {
     Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
   }
   
-  Serial.println("....................");
+  // Serial.println("....................");
   // Serial.printf("Number of samples: %d\n", userBuffer);
-  delay(2000);
+  delay(200);
 }
