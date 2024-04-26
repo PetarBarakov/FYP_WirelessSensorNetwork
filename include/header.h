@@ -2,8 +2,9 @@
 #include <Wire.h>
 
 #include "I2C_test.h"
-#include "BLE_publish.h"
+// #include "BLE_publish.h"
 
 #include "SensorClass.h"
-#include "SHT40.h"
-#include "MAX30102.h"
+// #include "SHT40.h"
+// #include "MAX30102.h"
+#include "INA236.h"
