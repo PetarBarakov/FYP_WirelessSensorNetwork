@@ -63,7 +63,7 @@ void loop() {
     Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
   }
   
-  Serial.println("....................");
-  Serial.printf("Number of samples: %d\n", userBuffer);
-  delay(3000);
+  // Serial.println("....................");
+  // Serial.printf("Number of samples: %d\n", userBuffer);
+  delay(200);
 }
