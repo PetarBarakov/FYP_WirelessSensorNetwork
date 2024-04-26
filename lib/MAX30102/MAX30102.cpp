@@ -171,6 +171,8 @@ void MAX30102::init (uint8_t sampleAverage,
     ledCurrentConfig(typCurrent);   //The typical currnet should be im mA
     SpO2Config(SpO2ADCRange, SpO2SampleRate, SpO2PulseWidth);
 
+    writeToReg(INT_EN1, 0b10000000); //enable the overflow interrupt
+
     // readStatus();
 }
 
@@ -214,31 +216,41 @@ void MAX30102::rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_
     uint8_t numSamples = 0;
 
     if(rdPointer <= wrPointer) numSamples = wrPointer - rdPointer;
-    else numSamples = 32 - (wrPointer - rdPointer);
-    
+    else numSamples = 32 - (rdPointer - wrPointer);
+
     if(numSamples == 0) Serial.println("No samples in the FIFO");
     if(numSamples > 32)
     {
-        numSamples = 32;
-        Serial.println("ERROR: More samples that allowed");
+        // numSamples = 32;
+        Serial.println("-----------------ERROR: More samples that allowed-----------------");
     }
-    // Serial.printf("Write pointer %01X\n", wrPointer);
-    // Serial.printf("Read pointer %01X\n", rdPointer);
+    Serial.printf("Write pointer %d\n", wrPointer);
+    Serial.printf("Read pointer %d\n", rdPointer);
+
+    //Read the interupt register
+    writeSensor1Byte(INT_STAT1);
+    uint8_t regBuffer;
+    readSensorBytes(&regBuffer, 1);
+    Serial.printf("The interrupt register value: %02X\n", regBuffer);
+    Serial.printf("The interrupt register value: %d\n", (regBuffer & 0b10000000) >> 7);
+
+    //Read the overrlow register
+    writeSensor1Byte(FIFO_OVF_COUNTER);
+    readSensorBytes(&regBuffer, 1);
+    Serial.printf("The overflow counter register value: %d\n", regBuffer);
+
+
 
     usedBuffer = 0;
 
     while (numSamples > 0)
     {
-        // Serial.printf("Num of samples %f\n", numSamples);  
-
         //one sample read in Sp02 mode
         uint8_t rxBuffer [6];
     
         writeSensor1Byte(FIFO_DATA);
         readSensorBytes(rxBuffer, 6);
 
-        // uint8_t redSampleRaw [3] = {rxBuffer[0], rxBuffer[1], rxBuffer[2]};
-        // uint8_t irSampleRaw [3] = {rxBuffer[3], rxBuffer[4], rxBuffer[5]};
         *(redSampleRaw + usedBuffer) = 65536 * rxBuffer[0] + 256 * rxBuffer[1] + rxBuffer[2];
         *(irSampleRaw  + usedBuffer) =  65536 * rxBuffer[3] + 256 * rxBuffer[4] + rxBuffer[5];
         

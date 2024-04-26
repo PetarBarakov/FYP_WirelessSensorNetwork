@@ -7,9 +7,9 @@
 
 // Interupt Registers
 // All interupts are disabled by default
-// #define INT_STAT1 0x00
+#define INT_STAT1 0x00
 // #define INT_STAT2 0x01
-// #define INT_EN1 0x02
+#define INT_EN1 0x02
 // #define INT_EN2 0x03
 
 //FIFO Register
