@@ -26,5 +26,6 @@ class INA236 : public Sensor
     private:
     void configure(bool adcRange, uint8_t sampleAverage);
     void calibrate(uint16_t shuntResistanceVal);
+    void reset();
 
 };
