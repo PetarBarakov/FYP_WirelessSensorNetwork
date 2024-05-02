@@ -16,7 +16,7 @@ class INA236 : public Sensor
 {
     public:
     INA236(uint8_t sensorAddress);
-    void init(bool adcRange, uint8_t sampleAverage, uint16_t shuntResistanceVal);
+    void init(bool adcRange, uint16_t sampleAverage, uint16_t shuntResistanceVal);
 
     void readShuntVoltage(double &shuntVoltage);
     void readBusVoltage(uint16_t &busVoltage);
@@ -24,8 +24,10 @@ class INA236 : public Sensor
     void readCurrent(double &current);
     
     private:
-    void configure(bool adcRange, uint8_t sampleAverage);
+    void configure(bool adcRange, uint16_t sampleAverage);
     void calibrate(uint16_t shuntResistanceVal);
     void reset();
+
+    double resolution;
 
 };

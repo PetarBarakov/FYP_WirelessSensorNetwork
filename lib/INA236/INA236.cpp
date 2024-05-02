@@ -4,10 +4,13 @@ INA236::INA236(uint8_t sensorAddress) : Sensor(sensorAddress)
 {
 }
 
-void INA236::init(bool adcRange, uint8_t sampleAverage, uint16_t shuntResistanceVal)
+void INA236::init(bool adcRange, uint16_t sampleAverage, uint16_t shuntResistanceVal)
 {
     configure(adcRange, sampleAverage);
     calibrate(shuntResistanceVal);
+
+    if(adcRange == 0) resolution = 2.5;
+    if(adcRange == 1) resolution = 0.625;
 }
 
 void INA236::readShuntVoltage(double &shuntVoltage)
@@ -18,7 +21,7 @@ void INA236::readShuntVoltage(double &shuntVoltage)
 
     int16_t ShuntRawVoltage= (rxShuntRaw[1] << 8) | rxShuntRaw[0];
     
-    shuntVoltage = ShuntRawVoltage / 0.025; //result in milivolts
+    shuntVoltage = ShuntRawVoltage * resolution / 1000.0; //result in milivolts
 }
 
 void INA236::readBusVoltage(uint16_t &busVoltage)
@@ -50,7 +53,7 @@ void INA236::readCurrent(double &current)
     current = CurrentRaw / 1.0; //result in milivolts
 }
 
-void INA236::configure(bool adcRange, uint8_t sampleAverage)
+void INA236::configure(bool adcRange, uint16_t sampleAverage)
 {
     /*ADC Range Configuration:
         0b     -->      +-81.92 mV
