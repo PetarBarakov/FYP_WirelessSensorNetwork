@@ -24,7 +24,7 @@ void INA236::readShuntVoltage(double &shuntVoltage)
     shuntVoltage = ShuntRawVoltage * resolution / 1000.0; //result in milivolts
 }
 
-void INA236::readBusVoltage(uint16_t &busVoltage)
+void INA236::readBusVoltage(uint32_t &busVoltage)
 {
     writeSensor1Byte(INA236_BUSVOLTAGE_REG);
     uint8_t rxBusRaw [2];
@@ -33,7 +33,7 @@ void INA236::readBusVoltage(uint16_t &busVoltage)
     busVoltage = (rxBusRaw[1] << 8) | rxBusRaw[0];
 }
 
-void INA236::readPower(uint16_t &power)
+void INA236::readPower(uint32_t &power)
 {
     writeSensor1Byte(INA236_POWER_REG);
     uint8_t rxPowerRaw [2];

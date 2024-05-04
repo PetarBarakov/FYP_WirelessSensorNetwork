@@ -8,3 +8,4 @@
 // #include "SHT40.h"
 // #include "MAX30102.h"
 #include "INA236.h"
+#include "INA228.h"

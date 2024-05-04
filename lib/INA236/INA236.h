@@ -1,3 +1,6 @@
+#ifndef INA236_H
+#define INA236_H
+
 #include <Arduino.h>
 #include <Wire.h>
 #include "SensorClass.h"
@@ -19,8 +22,8 @@ class INA236 : public Sensor
     void init(bool adcRange, uint16_t sampleAverage, uint16_t shuntResistanceVal);
 
     void readShuntVoltage(double &shuntVoltage);
-    void readBusVoltage(uint16_t &busVoltage);
-    void readPower(uint16_t &power);
+    void readBusVoltage(uint32_t &busVoltage);
+    void readPower(uint32_t &power);
     void readCurrent(double &current);
     
     private:
@@ -31,3 +34,5 @@ class INA236 : public Sensor
     double resolution;
 
 };
+
+#endif
