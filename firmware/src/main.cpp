@@ -4,15 +4,12 @@
 #define pinSDA 6 
 #define pinSCL 7 
 
-//Uncomment the desired ESP to be programmed
-// #define ESP32_SENSORS_MEASUREMENT
-//#define ESP32_POWER_MEASUREMENT
-
 #ifdef ESP32_SENSORS_MEASUREMENT
 
 #define SHT40_ADDRESS 0x44
 #define MAX30102_ADDRESS 0x57
 #define SGP41_ADDRESS 0x59
+#define LIS2DE12_ADDRESS 0x18
 
 // publisherBLE node1BLE("FYP_SensorNode0"); //Initialise an object for the BLE transmission
 SHT40 TRHSensor(SHT40_ADDRESS); //Intialise an object to the temperature and relative humidity sensor
@@ -92,6 +89,9 @@ void loop() {
   Serial.printf("VOC: %f \t NOX: %f\n", vocOut, noxOut);
 
   delay(3000);
+
+// ------------ Accelerometer ------------
+
 }
 
 
