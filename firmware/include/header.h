@@ -10,6 +10,7 @@
 #include "SensorClass.h"
 #include "SHT40.h"
 #include "MAX30102.h"
+#include "SGP41.h"
 
 //Power Sensor Libraries
 #include "INA236.h"

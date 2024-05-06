@@ -20,6 +20,9 @@ SHT40 TRHSensor(SHT40_ADDRESS); //Intialise an object to the temperature and rel
 //Initialise an object for the PPG sensor
 MAX30102 PPGSensor(MAX30102_ADDRESS);
 
+//Initialise an object for the VOC sensor
+SGP41 VOCSensor(SGP41_ADDRESS);
+
 void setup() {
   //Initialise Serial communication
   Serial.begin(115200);
@@ -38,6 +41,10 @@ void setup() {
                   (uint8_t) 18                //SpO2PulseWidth
                 );  
 
+  uint16_t SRAW_VOC_INTIAL = 0;
+  VOCSensor.executeConditioning(SRAW_VOC_INTIAL);
+  Serial.printf("Initial SRAW VOC: %d\n", SRAW_VOC_INTIAL);
+
   // I2CSearchInit();
 
   // node1BLE.BLEinit();
@@ -53,23 +60,37 @@ void loop() {
   // char value [] = "Temp: 7";
 
   // node1BLE.BLEsendValue(value);
+
+//------------ Temperature and Relative Humidity Sensor ------------
+
   // double temp, rh;
-
   // TRHSensor.readTempHumid(temp, rh);
-  uint32_t redSampleBuffer [32];
-  uint32_t irSampleBuffer [32];
-  uint8_t userBuffer;
   
-  PPGSensor.SpO2read(redSampleBuffer, irSampleBuffer, userBuffer);
+//------------ PPG Sensor ------------
+
+  // uint32_t redSampleBuffer [32];
+  // uint32_t irSampleBuffer [32];
+  // uint8_t userBuffer;
+  
+  // PPGSensor.SpO2read(redSampleBuffer, irSampleBuffer, userBuffer);
 
 
-  for(uint8_t i = 0; i < userBuffer; i++)
-  {
-    Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
-  }
+  // for(uint8_t i = 0; i < userBuffer; i++)
+  // {
+  //   Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
+  // }
   
-  Serial.println("....................");
-  Serial.printf("Number of samples: %d\n", userBuffer);
+  // Serial.println("....................");
+  // Serial.printf("Number of samples: %d\n", userBuffer);
+
+// ------------ VOC Sensor ------------
+
+  double vocOut = 0, noxOut = 0;
+
+  VOCSensor.readSample(vocOut, noxOut);
+
+  Serial.printf("VOC: %f \t NOX: %f\n", vocOut, noxOut);
+
   delay(3000);
 }
 
