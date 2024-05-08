@@ -49,7 +49,7 @@ void publisherBLE::BLEsendValue(char* transmitValue)
 {
     if (Callbacks_handle->deviceConnected) {
         pCharacteristic->setValue(transmitValue);
-        Serial.printf("The transmitted values is: %s.\n", transmitValue);
+        // Serial.printf("The transmitted values is: %s.\n", transmitValue);
         pCharacteristic->notify();
     }
     // disconnecting

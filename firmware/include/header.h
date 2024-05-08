@@ -1,6 +1,7 @@
 // Standard Arduino Libraries
 #include <Arduino.h>
 #include <Wire.h>
+#include <SPI.h>
 
 //General Communication Libraries
 #include "I2C_test.h"
@@ -12,6 +13,7 @@
 #include "MAX30102.h"
 #include "SGP41.h"
 #include "LIS2DE12.h"
+#include "ADS1292.h"
 
 //Power Sensor Libraries
 #include "INA236.h"

@@ -11,7 +11,13 @@
 #define SGP41_ADDRESS 0x59
 #define LIS2DE12_ADDRESS 0x18
 
-// publisherBLE node1BLE("FYP_SensorNode0"); //Initialise an object for the BLE transmission
+// #include <SPI.h>
+// #define ECG_SPI_MISO 0
+// #define ECG_SPI_MOSI 3
+// #define ECG_SPI_SCK 1
+// #define ECG_SPI_CS 10
+
+publisherBLE node1BLE("FYP_SensorNode0"); //Initialise an object for the BLE transmission
 SHT40 TRHSensor(SHT40_ADDRESS); //Intialise an object to the temperature and relative humidity sensor
 
 //Initialise an object for the PPG sensor
@@ -21,6 +27,8 @@ MAX30102 PPGSensor(MAX30102_ADDRESS);
 SGP41 VOCSensor(SGP41_ADDRESS);
 
 LIS2DE12 AccelSensor(LIS2DE12_ADDRESS);
+
+// ADS1292 ECGSensor;
 
 void setup() {
   //Initialise Serial communication
@@ -32,23 +40,23 @@ void setup() {
 
   // delay(5000);
 
-  PPGSensor.init( (uint8_t) 8,                //sampleAverage
-                  (uint8_t) 1,                //mode
-                  (uint8_t) 12,                //typCurrent
-                  (uint8_t) 0b10,             //SpO2ADCRange corresponding to bits
-                  (uint16_t) 100,              //SpO2SampleRate
-                  (uint8_t) 18                //SpO2PulseWidth
-                );  
+  // PPGSensor.init( (uint8_t) 8,                //sampleAverage
+  //                 (uint8_t) 1,                //mode
+  //                 (uint8_t) 12,                //typCurrent
+  //                 (uint8_t) 0b10,             //SpO2ADCRange corresponding to bits
+  //                 (uint16_t) 100,              //SpO2SampleRate
+  //                 (uint8_t) 18                //SpO2PulseWidth
+  //               );  
 
-  uint16_t SRAW_VOC_INTIAL = 0;
-  VOCSensor.executeConditioning(SRAW_VOC_INTIAL);
-  Serial.printf("Initial SRAW VOC: %d\n", SRAW_VOC_INTIAL);
+  // uint16_t SRAW_VOC_INTIAL = 0;
+  // VOCSensor.executeConditioning(SRAW_VOC_INTIAL);
+  // Serial.printf("Initial SRAW VOC: %d\n", SRAW_VOC_INTIAL);
 
-  AccelSensor.init(100, 2); //Sampler rate of 100Hz and scale of 2g
+  // AccelSensor.init(100, 2); //Sampler rate of 100Hz and scale of 2g
 
   // I2CSearchInit();
 
-  // node1BLE.BLEinit();
+  node1BLE.BLEinit();
 
   // PPGSensor.clearFIFO();
 
@@ -64,8 +72,16 @@ void loop() {
 
 //------------ Temperature and Relative Humidity Sensor ------------
 
-  // double temp, rh;
-  // TRHSensor.readTempHumid(temp, rh);
+  double temp, rh;
+  TRHSensor.readTempHumid(temp, rh);
+  char TRHmessage[32];
+  sprintf(TRHmessage, "%f,%f", temp, rh);
+
+  Serial.printf("TEMP: %f \t RH: %f\n", temp, rh);
+  node1BLE.BLEsendValue(TRHmessage);
+
+
+
   
 //------------ PPG Sensor ------------
 
@@ -94,21 +110,21 @@ void loop() {
 
 // ------------ Accelerometer ------------
 
-  double xAccel[32], yAccel[32], zAccel[32];
-  uint8_t numSamples = 0;
+  // double xAccel[32], yAccel[32], zAccel[32];
+  // uint8_t numSamples = 0;
 
-  AccelSensor.readAcceleration(xAccel, yAccel, zAccel, &numSamples);
+  // AccelSensor.readAcceleration(xAccel, yAccel, zAccel, &numSamples);
 
-  for(uint8_t i = 0; i < numSamples; i++)
-  {
-    Serial.printf("X: %f \t Y: %f \t Z: %f\n", xAccel[i], yAccel[i], zAccel[i]);
-  }
-  Serial.println("....................");
+  // for(uint8_t i = 0; i < numSamples; i++)
+  // {
+  //   Serial.printf("X: %f \t Y: %f \t Z: %f\n", xAccel[i], yAccel[i], zAccel[i]);
+  // }
+  // Serial.println("....................");
 
 
 // ------------------ ECG Sensor ------------------
 
-
+  // ECGSensor.readConfigReg1();
   delay(2000);
 
 }
