@@ -14,16 +14,29 @@
 // #define LIS2DE12_REFERENCE 0x26      // <-- reference for interrupt
 // #define LIS2DE12_STATUS_REG 0x27     // <-- status register
 #define LIS2DE12_FIFO_READ_START 0x28   // <-- acceleration data from FIFO
-#define LIS2DE12_OUT_X 0x29             // <-- acceleration X-axis NORMAL MODE 
-#define LIS2DE12_OUT_Y 0x2B             // <-- acceleration Y-axis NORMAL MODE
-#define LIS2DE12_OUT_Z 0x2D             // <-- acceleration Z-axis NORMAL MODE
+// #define LIS2DE12_OUT_X 0x29             // <-- acceleration X-axis NORMAL MODE 
+// #define LIS2DE12_OUT_Y 0x2B             // <-- acceleration Y-axis NORMAL MODE
+// #define LIS2DE12_OUT_Z 0x2D             // <-- acceleration Z-axis NORMAL MODE
 #define LIS2DE12_FIFO_CTRL_REG 0x2E     // <-- FIFO control
 #define LIS2DE12_FIFO_SRC_REG 0x2F      // <-- FIFO status
 // #define LIS2DE12_ACT_THS 0x3E        // <-- activity threshold
 // #define LIS2DE12_ACT_DUR 0x3F        // <-- activity duration
 
 class LIS2DE12 : public Sensor{
+    
+    public:
+    LIS2DE12(uint8_t sensorAddress);
+    void init(uint16_t sampleRate, uint8_t inputScale);
+    void readAcceleration(double* x, double* y, double* z, uint8_t* numSamples);
 
+    private:
+    void setSampleRate(uint16_t sampleRate);
+    void setScale(uint8_t inputscale);
+    void setFIFO();
+    void setFIFOMode();
+    void readFifoData(int16_t* x, int16_t* y, int16_t* z, uint8_t* numSamples);
+
+    uint8_t scale;
 };
 
 #endif

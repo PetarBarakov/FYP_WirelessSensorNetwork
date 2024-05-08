@@ -11,6 +11,7 @@
 #include "SHT40.h"
 #include "MAX30102.h"
 #include "SGP41.h"
+#include "LIS2DE12.h"
 
 //Power Sensor Libraries
 #include "INA236.h"
