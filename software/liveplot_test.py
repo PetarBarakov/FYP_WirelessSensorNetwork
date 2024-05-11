@@ -1,5 +1,9 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+
+import BLE_receiver
+
+
 import random
 
 # Parameters
@@ -41,8 +45,8 @@ def read_humid():
 def animate(i, tempSamples, humidSamples):
 
 
-    temp_c = read_temp()
-    humid = read_humid()
+    temp_c =
+    humid =
     # Add y to list
     tempSamples.append(temp_c)
     humidSamples.append(humid)
@@ -65,3 +69,4 @@ ani = animation.FuncAnimation(fig,
     interval=50,
     blit=True)
 plt.show()
+
