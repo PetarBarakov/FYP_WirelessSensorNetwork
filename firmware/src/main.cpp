@@ -20,13 +20,13 @@
 publisherBLE node1BLE("FYP_SensorNode0"); //Initialise an object for the BLE transmission
 SHT40 TRHSensor(SHT40_ADDRESS); //Intialise an object to the temperature and relative humidity sensor
 
-//Initialise an object for the PPG sensor
-MAX30102 PPGSensor(MAX30102_ADDRESS);
+// //Initialise an object for the PPG sensor
+// MAX30102 PPGSensor(MAX30102_ADDRESS);
 
-//Initialise an object for the VOC sensor
-SGP41 VOCSensor(SGP41_ADDRESS);
+// //Initialise an object for the VOC sensor
+// SGP41 VOCSensor(SGP41_ADDRESS);
 
-LIS2DE12 AccelSensor(LIS2DE12_ADDRESS);
+// LIS2DE12 AccelSensor(LIS2DE12_ADDRESS);
 
 // ADS1292 ECGSensor;
 
