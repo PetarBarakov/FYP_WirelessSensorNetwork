@@ -58,6 +58,8 @@ def plot ():
     tempax.set_ylabel('Temperature (deg C)')
     humidax.set_ylabel('Humidity (%)')
 
+    plt.legend([tempLine, humidLine], ['Temperature', 'Humidity'])
+
 
     # Set up plot to call animate() function periodically
     ani = animation.FuncAnimation(fig,
