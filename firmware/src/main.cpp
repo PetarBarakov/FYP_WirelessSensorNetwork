@@ -125,7 +125,7 @@ void loop() {
 // ------------------ ECG Sensor ------------------
 
   // ECGSensor.readConfigReg1();
-  delay(2000);
+  delay(100);
 
 }
 
