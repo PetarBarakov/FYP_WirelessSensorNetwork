@@ -13,8 +13,25 @@ CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 DeviceName = "FYP_SensorNode0"
 samplingRate = 0.1 # 2 second sampling rate
 
+#Temperature and Humidity values
 Temp = 0
 Humid = 0
+
+#PPG values
+IR_val = 0
+RED_val = 0
+
+#VOC values
+VOC_val = 0
+NO2_val = 0
+
+#ECG values
+
+
+#Accelerometer values
+X_acc =0
+Y_acc =0
+Z_acc =0
 
 async def BLEconnect():
     print("Scanning for device... (timeout after 10s)")
@@ -26,23 +43,62 @@ async def BLEconnect():
         print("DEVICE NOT FOUND.....")
     return device
 
-async def BLErx(device, outputFile):
+async def BLErx_temp(device, outputFile):
     global Humid, Temp
     if device:
         async with BleakClient(device) as client:
             while True:
             
-                TempHumid = await client.read_gatt_char(CHARACTERISTIC_UUID)
-                TempHumid = TempHumid.decode("utf-8")
+                buff = await client.read_gatt_char(CHARACTERISTIC_UUID)
+                buff = buff.decode("utf-8")
 
-                Temp = float(TempHumid.split(",")[0])
-                Humid = float(TempHumid.split(",")[1])
+                Temp = float(buff.split(",")[0])
+                Humid = float(buff.split(",")[1])
 
                 print(f"Temperature: {Temp} \t Humidity: {Humid}")
     
-                outputFile.write(TempHumid)
+                outputFile.write(buff)
                 outputFile.write("\n")
                 await asyncio.sleep(samplingRate)
+
+async def BLErx_PPG(device, outputFile):
+    global IR_val, RED_val
+    if device:
+        async with BleakClient(device) as client:
+            while True:
+            
+                buff = await client.read_gatt_char(CHARACTERISTIC_UUID)
+                buff = buff.decode("utf-8")
+
+                IR_val = float(buff.split(",")[0])
+                RED_val = float(buff.split(",")[1])
+
+                print(f"IR: {IR_val} \t Red: {RED_val}")
+    
+                outputFile.write(buff)
+                outputFile.write("\n")
+                await asyncio.sleep(samplingRate)
+
+
+async def BLErx_VOC(device, outputFile):
+    global VOC_val, NO2_val
+    if device:
+        async with BleakClient(device) as client:
+            while True:
+            
+                buff = await client.read_gatt_char(CHARACTERISTIC_UUID)
+                buff = buff.decode("utf-8")
+
+                VOC_val = float(buff.split(",")[0])
+                NO2_val = float(buff.split(",")[1])
+
+                print(f"VOC: {VOC_val} \t NO2: {NO2_val}")
+    
+                outputFile.write(buff)
+                outputFile.write("\n")
+                await asyncio.sleep(samplingRate)
+
+
 
 
 # async def async_main(device, outputFile):

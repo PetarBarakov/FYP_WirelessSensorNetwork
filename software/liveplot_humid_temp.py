@@ -4,16 +4,10 @@ import matplotlib.animation as animation
 import BLE_receiver
 import asyncio
 
-import time
-
-import random
-
 import threading
 
-
-
 # This function is called periodically from FuncAnimation
-def animate(i, tempSamples, humidSamples, timeLen, tempLine, humidLine):
+def animate(i, tempSamples, humidSamples, timeLen, tempLine, humidLine, tempRange, humidRange, tempax, humidax):
 
     temp_c = BLE_receiver.Temp
     humid = BLE_receiver.Humid
@@ -29,14 +23,53 @@ def animate(i, tempSamples, humidSamples, timeLen, tempLine, humidLine):
     tempLine.set_ydata(tempSamples)
     humidLine.set_ydata(humidSamples)
 
+
+    # Autoscale Y-axis
+    if(temp_c != 0 and humid != 0):
+        if(temp_c > tempRange[1]):
+            tempRange[1] = temp_c + 1
+            tempax.set_ylim(tempRange)
+
+        if(temp_c < tempRange[0]):
+            tempRange[0] = temp_c - 1
+            tempax.set_ylim(tempRange)
+
+        if(temp_c < tempRange[1] - 5):
+            tempRange[1] -= 1
+            tempax.set_ylim(tempRange)
+
+        if(temp_c > tempRange[0] + 5):
+            tempRange[0] += 1
+            tempax.set_ylim(tempRange)
+
+
+
+        if(humid > humidRange[1]):
+            humidRange[1] = humid + 1
+            humidax.set_ylim(humidRange)
+            
+
+        if(humid < humidRange[0]):
+            humidRange[0] = humid - 1
+            humidax.set_ylim(humidRange)
+
+        if(humid < humidRange[1] - 5):
+            humidRange[1] -= 1
+            humidax.set_ylim(humidRange)
+
+        if(humid > humidRange[0] + 5):
+            humidRange[0] += 1
+            humidax.set_ylim(humidRange)
+
+
     return tempLine, humidLine, 
 
 def plot ():
 
     # Parameters
     timeLen = 200         # Number of points to display
-    tempRange = [24, 32]  # Range of possible Y values to display
-    humidRange = [40, 50]  # Range of possible Y values to display
+    tempRange = [24, 26]  # Range of possible Y values to display
+    humidRange = [44, 46]  # Range of possible Y values to display
 
     # Create figure for plotting
     fig = plt.figure()
@@ -60,11 +93,10 @@ def plot ():
 
     plt.legend([tempLine, humidLine], ['Temperature', 'Humidity'])
 
-
     # Set up plot to call animate() function periodically
     ani = animation.FuncAnimation(fig,
         animate,
-        fargs=(tempSamples, humidSamples, timeLen, tempLine, humidLine),
+        fargs=(tempSamples, humidSamples, timeLen, tempLine, humidLine, tempRange, humidRange, tempax, humidax),
         interval=BLE_receiver.samplingRate*1000,
         blit=True)
     plt.show()
@@ -74,9 +106,9 @@ def start_ploting():
     plot_thread.start()
 
 
-async def async_main(device, outputFile):
+async def async_main_temp(device, outputFile):
     
-    await asyncio.gather(BLE_receiver.BLErx(device, outputFile))
+    await asyncio.gather(BLE_receiver.BLErx_temp(device, outputFile))
 
 
 if __name__ == "__main__":
@@ -87,7 +119,7 @@ if __name__ == "__main__":
     data_file = open("Data/output.csv", "w")
     data_file.write("Temperature, Humidity\n")
 
-    asyncio.run(async_main(device=DeviceDetected, outputFile=data_file))
+    asyncio.run(async_main_temp(device=DeviceDetected, outputFile=data_file))
     # plot()
 
     data_file.close()
