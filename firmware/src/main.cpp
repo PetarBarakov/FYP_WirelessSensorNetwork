@@ -21,7 +21,7 @@ publisherBLE node1BLE("FYP_SensorNode0"); //Initialise an object for the BLE tra
 SHT40 TRHSensor(SHT40_ADDRESS); //Intialise an object to the temperature and relative humidity sensor
 
 // //Initialise an object for the PPG sensor
-// MAX30102 PPGSensor(MAX30102_ADDRESS);
+MAX30102 PPGSensor(MAX30102_ADDRESS);
 
 // //Initialise an object for the VOC sensor
 // SGP41 VOCSensor(SGP41_ADDRESS);
@@ -40,13 +40,13 @@ void setup() {
 
   // delay(5000);
 
-  // PPGSensor.init( (uint8_t) 8,                //sampleAverage
-  //                 (uint8_t) 1,                //mode
-  //                 (uint8_t) 12,                //typCurrent
-  //                 (uint8_t) 0b10,             //SpO2ADCRange corresponding to bits
-  //                 (uint16_t) 100,              //SpO2SampleRate
-  //                 (uint8_t) 18                //SpO2PulseWidth
-  //               );  
+  PPGSensor.init( (uint8_t) 8,                //sampleAverage
+                  (uint8_t) 1,                //mode
+                  (uint8_t) 20,                //typCurrent [mA]
+                  (uint8_t) 0b10,             //SpO2ADCRange corresponding to bits
+                  (uint16_t) 800,              //SpO2SampleRate
+                  (uint8_t) 18                //SpO2PulseWidth
+                );  
 
   // uint16_t SRAW_VOC_INTIAL = 0;
   // VOCSensor.executeConditioning(SRAW_VOC_INTIAL);
@@ -72,30 +72,33 @@ void loop() {
 
 //------------ Temperature and Relative Humidity Sensor ------------
 
-  double temp, rh;
-  TRHSensor.readTempHumid(temp, rh);
-  char TRHmessage[32];
-  sprintf(TRHmessage, "%f,%f", temp, rh);
+  // double temp, rh;
+  // TRHSensor.readTempHumid(temp, rh);
+  // char TRHmessage[32];
+  // sprintf(TRHmessage, "%f,%f", temp, rh);
 
-  Serial.printf("TEMP: %f \t RH: %f\n", temp, rh);
-  node1BLE.BLEsendValue(TRHmessage);
+  // Serial.printf("TEMP: %f \t RH: %f \t", temp, rh);
+  // node1BLE.BLEsendValue(TRHmessage);
 
 
 
   
 //------------ PPG Sensor ------------
 
-  // uint32_t redSampleBuffer [32];
-  // uint32_t irSampleBuffer [32];
-  // uint8_t userBuffer;
+  uint32_t redSampleBuffer [32];
+  uint32_t irSampleBuffer [32];
+  uint8_t userBuffer;
   
-  // PPGSensor.SpO2read(redSampleBuffer, irSampleBuffer, userBuffer);
+  PPGSensor.SpO2read(redSampleBuffer, irSampleBuffer, userBuffer);
 
 
-  // for(uint8_t i = 0; i < userBuffer; i++)
-  // {
-  //   Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
-  // }
+  for(uint8_t i = 0; i < userBuffer; i++)
+  {
+    Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
+    // char PPG_message[32];
+    // sprintf(PPG_message, "%d,%d", *(redSampleBuffer + i), *(irSampleBuffer + i));
+    // node1BLE.BLEsendValue(PPG_message); 
+  }
   
   // Serial.println("....................");
   // Serial.printf("Number of samples: %d\n", userBuffer);
@@ -125,7 +128,9 @@ void loop() {
 // ------------------ ECG Sensor ------------------
 
   // ECGSensor.readConfigReg1();
-  delay(100);
+  // delay(10);
+
+  // delay(1);
 
 }
 

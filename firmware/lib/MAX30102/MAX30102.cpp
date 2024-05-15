@@ -224,20 +224,20 @@ void MAX30102::rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_
         // numSamples = 32;
         Serial.println("-----------------ERROR: More samples that allowed-----------------");
     }
-    Serial.printf("Write pointer %d\n", wrPointer);
-    Serial.printf("Read pointer %d\n", rdPointer);
+    // Serial.printf("Write pointer %d\n", wrPointer);
+    // Serial.printf("Read pointer %d\n", rdPointer);
 
-    //Read the interupt register
-    writeSensor1Byte(INT_STAT1);
-    uint8_t regBuffer;
-    readSensorBytes(&regBuffer, 1);
-    Serial.printf("The interrupt register value: %02X\n", regBuffer);
-    Serial.printf("The interrupt register value: %d\n", (regBuffer & 0b10000000) >> 7);
+    // //Read the interupt register
+    // writeSensor1Byte(INT_STAT1);
+    // uint8_t regBuffer;
+    // readSensorBytes(&regBuffer, 1);
+    // Serial.printf("The interrupt register value: %02X\n", regBuffer);
+    // Serial.printf("The interrupt register value: %d\n", (regBuffer & 0b10000000) >> 7);
 
-    //Read the overrlow register
-    writeSensor1Byte(FIFO_OVF_COUNTER);
-    readSensorBytes(&regBuffer, 1);
-    Serial.printf("The overflow counter register value: %d\n", regBuffer);
+    // //Read the overrlow register
+    // writeSensor1Byte(FIFO_OVF_COUNTER);
+    // readSensorBytes(&regBuffer, 1);
+    // Serial.printf("The overflow counter register value: %d\n", regBuffer);
 
 
 
