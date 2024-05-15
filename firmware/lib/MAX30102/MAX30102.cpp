@@ -260,7 +260,7 @@ void MAX30102::rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_
 
 }
 
-void MAX30102::rawSp02ReadOneSample(uint32_t *redSampleRaw, uint32_t *irSampleRaw)
+void MAX30102::rawSpO2ReadOneSample(uint32_t *redSampleRaw, uint32_t *irSampleRaw)
 {   
     //wait for a sample to be present
     uint8_t rdPointer, wrPointer;
@@ -289,14 +289,46 @@ void MAX30102::rawSp02ReadOneSample(uint32_t *redSampleRaw, uint32_t *irSampleRa
     *irSampleRaw  =  65536 * rxBuffer[3] + 256 * rxBuffer[4] + rxBuffer[5];
 }
 
-void MAX30102::SpO2read(uint32_t *redSampleBuffer, uint32_t *irSampleBuffer, uint8_t &usedBuffer)
+void MAX30102::SpO2andHRread(int32_t *HR, int32_t *spo2)
 {   
+    static bool firstMeasurement = true;
 
-    // readStatus();
-    rawSpO2Read(redSampleBuffer, irSampleBuffer, usedBuffer);
+    
+    uint8_t bufferSize = 100;
+    uint32_t redSampleBuffer [bufferSize];
+    uint32_t irSampleBuffer [bufferSize];
 
-    //TODO: Sample conversion
+    if(firstMeasurement)
+    {
+        uint8_t numSamplesInBuffer = 0;
 
+        while (numSamplesInBuffer < bufferSize)
+        {   
+            rawSpO2ReadOneSample(redSampleBuffer + numSamplesInBuffer, irSampleBuffer + numSamplesInBuffer);
+            numSamplesInBuffer ++;        
+        }
+    }
+
+    int8_t validSPO2, validHeartRate;
+
+    maxim_heart_rate_and_oxygen_saturation(irSampleBuffer, bufferSize, redSampleBuffer, spo2, &validSPO2, HR, &validHeartRate);
+
+
+    
+    for (byte i = 25; i < 100; i++)
+    {
+      redSampleBuffer[i - 25] = redSampleBuffer[i];
+      irSampleBuffer[i - 25] = irSampleBuffer[i];
+    }
+
+    //take 25 sets of samples before calculating the heart rate.
+    uint8_t numSamplesAdded = 75;
+
+    while (numSamplesAdded < bufferSize)
+    {   
+        rawSpO2ReadOneSample(redSampleBuffer + numSamplesAdded, irSampleBuffer + numSamplesAdded);
+        numSamplesAdded ++;        
+    }
 }
 
 double MAX30102::HRread(uint32_t *irSampleBuffer)
@@ -314,7 +346,7 @@ double MAX30102::HRread(uint32_t *irSampleBuffer)
     double beatsPerMinute = 0;
     static uint16_t beatAvg;      
 
-    rawSp02ReadOneSample(&redSampleBuffer, irSampleBuffer);
+    rawSpO2ReadOneSample(&redSampleBuffer, irSampleBuffer);
     
     if (checkForBeat(*irSampleBuffer) == true)
     {

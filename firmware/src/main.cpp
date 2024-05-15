@@ -91,7 +91,12 @@ void loop() {
   uint8_t userBuffer;
   
   // PPGSensor.SpO2read(redSampleBuffer, irSampleBuffer, userBuffer);
-  double HR = PPGSensor.HRread(&irSampleBuffer);
+  // double HR = PPGSensor.HRread(&irSampleBuffer);
+
+  int32_t HR, SpO2;
+
+  PPGSensor.SpO2andHRread(&HR, &SpO2);
+
   static uint32_t sampleCounter = 0;
 
   // Serial.printf(".");
@@ -99,7 +104,7 @@ void loop() {
   // if(sampleCounter == 1000)
   // {
   // if(HR != 0)
-    Serial.printf("Heart Rate: %f \t IR: %d\n", HR, irSampleBuffer);
+    Serial.printf("Heart Rate: %d \t Sp02: %d\n", HR, SpO2);
   //   sampleCounter = 0;
   // }
   // sampleCounter++;

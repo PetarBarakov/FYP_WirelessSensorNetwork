@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include "SensorClass.h"
 #include "heartRate.h"
+#include "spo2_algorithm.h"
 
 // Interupt Registers
 // All interupts are disabled by default
@@ -42,7 +43,9 @@ class MAX30102 : public Sensor
                 uint8_t SpO2PulseWidth
               );
 
-    void SpO2read(uint32_t *redSampleBuffer, uint32_t *irSampleBuffer, uint8_t &usedBuffer);
+    // void SpO2andHRread(uint32_t *redSampleBuffer, uint32_t *irSampleBuffer, uint8_t &usedBuffer);
+    void SpO2andHRread(int32_t *HR, int32_t *sp02);
+    
     double HRread(uint32_t *irSampleBuffer);  
 
     void clearFIFO();
@@ -51,7 +54,7 @@ class MAX30102 : public Sensor
 
     private:
     void rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_t &usedBuffer);
-    void rawSp02ReadOneSample(uint32_t *redSampleRaw, uint32_t *irSampleRaw);
+    void rawSpO2ReadOneSample(uint32_t *redSampleRaw, uint32_t *irSampleRaw);
 
     //Configiration functions
     void fifoConfig(uint8_t sampleAverage);
