@@ -260,6 +260,35 @@ void MAX30102::rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_
 
 }
 
+void MAX30102::rawSp02ReadOneSample(uint32_t *redSampleRaw, uint32_t *irSampleRaw)
+{   
+    //wait for a sample to be present
+    uint8_t rdPointer, wrPointer;
+    uint8_t numSamples = 0;
+
+    while (numSamples == 0)
+    {
+        writeSensor1Byte(FIFO_RD_PTR);
+        readSensorBytes(&rdPointer, 1);
+
+        writeSensor1Byte(FIFO_WR_PTR);
+        readSensorBytes(&wrPointer, 1);
+
+        if(rdPointer <= wrPointer) numSamples = wrPointer - rdPointer;
+        else numSamples = 32 - (rdPointer - wrPointer);
+
+        delay(1);
+    }
+    //one sample read in Sp02 mode
+    uint8_t rxBuffer [6];
+
+    writeSensor1Byte(FIFO_DATA);
+    readSensorBytes(rxBuffer, 6);
+
+    *redSampleRaw = 65536 * rxBuffer[0] + 256 * rxBuffer[1] + rxBuffer[2];
+    *irSampleRaw  =  65536 * rxBuffer[3] + 256 * rxBuffer[4] + rxBuffer[5];
+}
+
 void MAX30102::SpO2read(uint32_t *redSampleBuffer, uint32_t *irSampleBuffer, uint8_t &usedBuffer)
 {   
 
@@ -268,4 +297,62 @@ void MAX30102::SpO2read(uint32_t *redSampleBuffer, uint32_t *irSampleBuffer, uin
 
     //TODO: Sample conversion
 
+}
+
+double MAX30102::HRread(uint32_t *irSampleBuffer)
+{
+    uint32_t redSampleBuffer;
+    // uint32_t irSampleBuffer;
+
+    static long lastBeat = 0;
+
+    const uint8_t RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
+    static double rates[RATE_SIZE]; //Array of heart rates
+    static uint8_t rateSpot = 0;
+    
+
+    double beatsPerMinute = 0;
+    static uint16_t beatAvg;      
+
+    rawSp02ReadOneSample(&redSampleBuffer, irSampleBuffer);
+    
+    if (checkForBeat(*irSampleBuffer) == true)
+    {
+        //We sensed a beat!
+        long delta = millis() - lastBeat;
+        lastBeat = millis();
+
+        beatsPerMinute = 60 / (delta / 1000.0);
+
+        if (beatsPerMinute < 255 && beatsPerMinute > 20)
+        {
+            rates[rateSpot++] = beatsPerMinute; //Store this reading in the array
+            rateSpot %= RATE_SIZE; //Wrap variable
+
+            //Take average of readings
+            beatAvg = 0;
+            for (byte x = 0 ; x < RATE_SIZE ; x++)
+                beatAvg += rates[x];
+            beatAvg /= RATE_SIZE;
+        }
+    }
+
+
+
+    // if(irSampleBuffer < 50000)
+    //     Serial.print(" No finger?\n");
+    // else
+    // {
+    //     Serial.print("IR=");
+    //     Serial.print(irSampleBuffer);
+    //     Serial.print(", BPM=");
+    //     Serial.print(beatsPerMinute);
+    //     Serial.print(", Avg BPM=");
+    //     Serial.print(beatAvg);
+    //     Serial.print("\n");
+
+    // }
+
+    // return beatsPerMinute;
+    return beatAvg;
 }

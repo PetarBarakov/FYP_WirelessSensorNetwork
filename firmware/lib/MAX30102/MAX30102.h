@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "SensorClass.h"
+#include "heartRate.h"
 
 // Interupt Registers
 // All interupts are disabled by default
@@ -42,7 +43,7 @@ class MAX30102 : public Sensor
               );
 
     void SpO2read(uint32_t *redSampleBuffer, uint32_t *irSampleBuffer, uint8_t &usedBuffer);
-    // void HRread();  
+    double HRread(uint32_t *irSampleBuffer);  
 
     void clearFIFO();
     void reset();
@@ -50,12 +51,14 @@ class MAX30102 : public Sensor
 
     private:
     void rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_t &usedBuffer);
+    void rawSp02ReadOneSample(uint32_t *redSampleRaw, uint32_t *irSampleRaw);
 
     //Configiration functions
     void fifoConfig(uint8_t sampleAverage);
     void modeConfig(uint8_t mode);
     void ledCurrentConfig(uint8_t typCurrent);
     void SpO2Config(uint8_t SpO2ADCRange, uint16_t SpO2SampleRate, uint8_t SpO2PulseWidth);
+
 
 };
 

@@ -86,19 +86,34 @@ void loop() {
 //------------ PPG Sensor ------------
 
   uint32_t redSampleBuffer [32];
-  uint32_t irSampleBuffer [32];
+  // uint32_t irSampleBuffer [32];
+  uint32_t irSampleBuffer;
   uint8_t userBuffer;
   
-  PPGSensor.SpO2read(redSampleBuffer, irSampleBuffer, userBuffer);
+  // PPGSensor.SpO2read(redSampleBuffer, irSampleBuffer, userBuffer);
+  double HR = PPGSensor.HRread(&irSampleBuffer);
+  static uint32_t sampleCounter = 0;
+
+  // Serial.printf(".");
+
+  // if(sampleCounter == 1000)
+  // {
+  // if(HR != 0)
+    Serial.printf("Heart Rate: %f \t IR: %d\n", HR, irSampleBuffer);
+  //   sampleCounter = 0;
+  // }
+  // sampleCounter++;
+
+    // Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
 
 
-  for(uint8_t i = 0; i < userBuffer; i++)
-  {
-    Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
-    // char PPG_message[32];
-    // sprintf(PPG_message, "%d,%d", *(redSampleBuffer + i), *(irSampleBuffer + i));
-    // node1BLE.BLEsendValue(PPG_message); 
-  }
+  // for(uint8_t i = 0; i < userBuffer; i++)
+  // {
+  //   Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
+  //   // char PPG_message[32];
+  //   // sprintf(PPG_message, "%d,%d", *(redSampleBuffer + i), *(irSampleBuffer + i));
+  //   // node1BLE.BLEsendValue(PPG_message); 
+  // }
   
   // Serial.println("....................");
   // Serial.printf("Number of samples: %d\n", userBuffer);
