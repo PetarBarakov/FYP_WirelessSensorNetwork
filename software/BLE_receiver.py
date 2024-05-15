@@ -11,7 +11,7 @@ SERVICE_UUID        = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
 DeviceName = "FYP_SensorNode0"
-samplingRate = 0.1 # 2 second sampling rate
+samplingRate = 0.1
 
 #Temperature and Humidity values
 Temp = 0
@@ -59,7 +59,7 @@ async def BLErx_temp(device, outputFile):
     
                 outputFile.write(buff)
                 outputFile.write("\n")
-                await asyncio.sleep(samplingRate)
+                # await asyncio.sleep(samplingRate)
 
 async def BLErx_PPG(device, outputFile):
     global IR_val, RED_val
