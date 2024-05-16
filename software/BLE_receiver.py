@@ -11,15 +11,14 @@ SERVICE_UUID        = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
 DeviceName = "FYP_SensorNode0"
-samplingRate = 0.1
-
+samplingRate = 0.01
 #Temperature and Humidity values
 Temp = 0
 Humid = 0
 
 #PPG values
-IR_val = 0
-RED_val = 0
+HR_val = 0
+SpO2_val = 0
 
 #VOC values
 VOC_val = 0
@@ -62,7 +61,7 @@ async def BLErx_temp(device, outputFile):
                 # await asyncio.sleep(samplingRate)
 
 async def BLErx_PPG(device, outputFile):
-    global IR_val, RED_val
+    global HR_val, SpO2_val
     if device:
         async with BleakClient(device) as client:
             while True:
@@ -70,10 +69,10 @@ async def BLErx_PPG(device, outputFile):
                 buff = await client.read_gatt_char(CHARACTERISTIC_UUID)
                 buff = buff.decode("utf-8")
 
-                IR_val = float(buff.split(",")[0])
-                RED_val = float(buff.split(",")[1])
+                HR_val = float(buff.split(",")[0])
+                SpO2_val = float(buff.split(",")[1])
 
-                print(f"IR: {IR_val} \t Red: {RED_val}")
+                print(f"HR: {HR_val} \t SpO2: {SpO2_val}")
     
                 outputFile.write(buff)
                 outputFile.write("\n")

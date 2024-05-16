@@ -7,100 +7,61 @@ import asyncio
 import threading
 
 # This function is called periodically from FuncAnimation
-def animate(i, IRSamples, RedSamples, timeLen, IRLine, RedLine, IRRange, RedRange, irax, redax):
+def animate(i, HRSamples, SpO2Samples, timeLen, HRLine, SpO2Line, HRRange, SpO2Range, HRax, SpO2ax):
 
-    ir = BLE_receiver.IR_val
-    red = BLE_receiver.RED_val
+    HR = BLE_receiver.HR_val
+    SpO2 = BLE_receiver.SpO2_val
     # Add y to list
-    IRSamples.append(ir)
-    RedSamples.append(red)
+    HRSamples.append(HR)
+    SpO2Samples.append(SpO2)
 
     # Limit y list to set number of items
-    IRSamples = IRSamples[-timeLen:]
-    RedSamples = RedSamples[-timeLen:]
+    HRSamples = HRSamples[-timeLen:]
+    SpO2Samples = SpO2Samples[-timeLen:]
 
     # Update line with new Y values
-    IRLine.set_ydata(IRSamples)
-    RedLine.set_ydata(RedSamples)
+    HRLine.set_ydata(HRSamples)
+    SpO2Line.set_ydata(SpO2Samples)
 
     # Adjust y-axis limits
-    irax.set_ylim(min(IRSamples)-100, max(IRSamples)+100)
-    redax.set_ylim(min(RedSamples)-100, max(RedSamples)+100)
+    HRax.set_ylim(min(HRSamples)-100, max(HRSamples)+100)
+    SpO2ax.set_ylim(min(SpO2Samples)-100, max(SpO2Samples)+100)
 
-
-    # # Autoscale Y-axis
-    # if(ir != 0 and red != 0):
-    #     if(ir > IRRange[1]):
-    #         IRRange[1] = ir + 10000
-    #         irax.set_ylim(IRRange)
-
-    #     if(ir < IRRange[0]):
-    #         IRRange[0] = ir - 10000
-    #         irax.set_ylim(IRRange)
-
-    #     if(ir < IRRange[1] - 50000):
-    #         IRRange[1] -= 10000
-    #         irax.set_ylim(IRRange)
-
-    #     if(ir > IRRange[0] + 50000):
-    #         IRRange[0] += 10000
-    #         irax.set_ylim(IRRange)
-
-
-
-    #     if(red > RedRange[1]):
-    #         RedRange[1] = red + 10000
-    #         redax.set_ylim(RedRange)
-            
-
-    #     if(red < RedRange[0]):
-    #         RedRange[0] = red - 10000
-    #         redax.set_ylim(RedRange)
-
-    #     if(red < RedRange[1] - 50):
-    #         RedRange[1] -= 10000
-    #         redax.set_ylim(RedRange)
-
-    #     if(red > RedRange[0] + 50):
-    #         RedRange[0] += 10000
-    #         redax.set_ylim(RedRange)
-
-
-    return IRLine, RedLine, 
+    return HRLine, SpO2Line, 
 
 def plot ():
 
     # Parameters
-    timeLen = 2000         # Number of points to display
-    IRRange = [2260000, 2260000]  # Range of possible Y values to display
-    RedRange = [2700000, 2700000]  # Range of possible Y values to display
+    timeLen = 200         # Number of points to display
+    HRRange = [2260000, 2260000]  # Range of possible Y values to display
+    SpO2Range = [2700000, 2700000]  # Range of possible Y values to display
 
     # Create figure for plotting
     fig = plt.figure()
-    irax = fig.add_subplot(1, 1, 1)
-    redax = irax.twinx()
+    HRax = fig.add_subplot(1, 1, 1)
+    SpO2ax = HRax.twinx()
     timeSamples = list(range(0, timeLen))
-    IRSamples = [0] * timeLen
-    RedSamples = [0] * timeLen
-    # irax.set_ylim(IRRange)
-    # redax.set_ylim(RedRange)
+    HRSamples = [0] * timeLen
+    SpO2Samples = [0] * timeLen
+    # HRax.set_ylim(HRRange)
+    # SpO2ax.set_ylim(SpO2Range)
 
     # Create a blank line. We will update the line in animate
-    IRLine, = irax.plot(timeSamples, IRSamples, color='blue')
-    RedLine, = redax.plot(timeSamples, RedSamples, color = 'red')
+    HRLine, = HRax.plot(timeSamples, HRSamples, color='blue')
+    SpO2Line, = SpO2ax.plot(timeSamples, SpO2Samples, color = 'red')
 
     # Add labels
     plt.title('PPG Data')
-    plt.xlabel('Red Samples')
-    irax.set_ylabel('IR')
-    redax.set_ylabel('RED')
+    plt.xlabel('SpO2 Samples')
+    HRax.set_ylabel('HR')
+    SpO2ax.set_ylabel('SpO2')
 
-    plt.legend([IRLine, RedLine], ['IR', 'RED'])
+    plt.legend([HRLine, SpO2Line], ['HR', 'SpO2'])
 
     # Set up plot to call animate() function periodically
     ani = animation.FuncAnimation(fig,
         animate,
-        fargs=(IRSamples, RedSamples, timeLen, IRLine, RedLine, IRRange, RedRange, irax, redax),
+        fargs=(HRSamples, SpO2Samples, timeLen, HRLine, SpO2Line, HRRange, SpO2Range, HRax, SpO2ax),
         interval=BLE_receiver.samplingRate*1000,
         blit=True)
     plt.show()
@@ -121,7 +82,7 @@ if __name__ == "__main__":
     DeviceDetected = asyncio.run(BLE_receiver.BLEconnect())
 
     data_file = open("Data/output_ppg.csv", "w")
-    data_file.write("IR, Red\n")
+    data_file.write("HR, SpO2\n")
 
     asyncio.run(async_main_temp(device=DeviceDetected, outputFile=data_file))
     # plot()
