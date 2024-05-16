@@ -6,6 +6,13 @@
 
 #ifdef ESP32_SENSORS_MEASUREMENT
 
+// #define PROGRAM_TRH_SENSOR
+#define PROGRAM_PPG_SENSOR
+// #define PROGRAM_VOC_SENSOR
+// #define PROGRAM_ACCEL_SENSOR
+// #define PROGRAM_ECG_SENSOR
+
+
 #define SHT40_ADDRESS 0x44
 #define MAX30102_ADDRESS 0x57
 #define SGP41_ADDRESS 0x59
@@ -40,6 +47,8 @@ void setup() {
 
   // delay(5000);
 
+  //Iniitalise PPG Sensor
+  #ifdef PROGRAM_PPG_SENSOR
   PPGSensor.init( (uint8_t) 8,                //sampleAverage
                   (uint8_t) 1,                //mode
                   (uint8_t) 20,                //typCurrent [mA]
@@ -47,6 +56,9 @@ void setup() {
                   (uint16_t) 800,              //SpO2SampleRate
                   (uint8_t) 18                //SpO2PulseWidth
                 );  
+
+  #endif //PROGRAM_PPG_SENSOR
+
 
   // uint16_t SRAW_VOC_INTIAL = 0;
   // VOCSensor.executeConditioning(SRAW_VOC_INTIAL);
@@ -56,6 +68,7 @@ void setup() {
 
   // I2CSearchInit();
 
+  //Initialise the BLE communication
   node1BLE.BLEinit();
 
   // PPGSensor.clearFIFO();
@@ -65,63 +78,46 @@ void setup() {
 void loop() {
   // I2CSearchAddr();
 
-  // static int value = 0;
-  // char value [] = "Temp: 7";
-
-  // node1BLE.BLEsendValue(value);
-
 //------------ Temperature and Relative Humidity Sensor ------------
 
-  // double temp, rh;
-  // TRHSensor.readTempHumid(temp, rh);
-  // char TRHmessage[32];
-  // sprintf(TRHmessage, "%f,%f", temp, rh);
+  #ifdef PROGRAM_TRH_SENSOR
 
-  // Serial.printf("TEMP: %f \t RH: %f \t", temp, rh);
-  // node1BLE.BLEsendValue(TRHmessage);
+  double temp, rh;
+  TRHSensor.readTempHumid(temp, rh);
 
+  //Transmit TRH data
+  char TRHmessage[32];
+  sprintf(TRHmessage, "%f,%f", temp, rh);
+  node1BLE.BLEsendValue(TRHmessage);
 
-
+  Serial.printf("TEMP: %f \t RH: %f \t", temp, rh);
+  #endif //PROGRAM_TRH_SENSOR
   
-//------------ PPG Sensor ------------
+//------------ PPG Sensor ------------  
 
-  uint32_t redSampleBuffer [32];
-  // uint32_t irSampleBuffer [32];
-  uint32_t irSampleBuffer;
-  uint8_t userBuffer;
-  
-  // PPGSensor.SpO2read(redSampleBuffer, irSampleBuffer, userBuffer);
-  // double HR = PPGSensor.HRread(&irSampleBuffer);
+  #ifdef PROGRAM_PPG_SENSOR
 
-  int32_t HR, SpO2;
+  int32_t HR = 0, SpO2 = 0;
+  static uint32_t PPGstartSampleTime = millis();
 
+  //Start sampling
   PPGSensor.SpO2andHRread(&HR, &SpO2);
+  uint32_t PPGsampleTimeStamp = millis();
 
-  static uint32_t sampleCounter = 0;
-
-  // Serial.printf(".");
-
-  // if(sampleCounter == 1000)
-  // {
-  // if(HR != 0)
+  if(PPGsampleTimeStamp - PPGstartSampleTime >= 1000)
+  {
     Serial.printf("Heart Rate: %d \t Sp02: %d\n", HR, SpO2);
-  //   sampleCounter = 0;
-  // }
-  // sampleCounter++;
+    
+    //Transmit PPG data
+    char PPGmessage[32];
+    sprintf(PPGmessage, "%d,%d", HR, SpO2);
+    node1BLE.BLEsendValue(PPGmessage);
+    
+    PPGstartSampleTime = PPGsampleTimeStamp;
+  }
 
-    // Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
+  #endif //PROGRAM_PPG_SENSOR
 
-
-  // for(uint8_t i = 0; i < userBuffer; i++)
-  // {
-  //   Serial.printf("Red: %d \t IR: %d\n", *(redSampleBuffer + i), *(irSampleBuffer + i));
-  //   // char PPG_message[32];
-  //   // sprintf(PPG_message, "%d,%d", *(redSampleBuffer + i), *(irSampleBuffer + i));
-  //   // node1BLE.BLEsendValue(PPG_message); 
-  // }
-  
-  // Serial.println("....................");
-  // Serial.printf("Number of samples: %d\n", userBuffer);
 
 // ------------ VOC Sensor ------------
 

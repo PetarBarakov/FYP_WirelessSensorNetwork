@@ -73,7 +73,7 @@ void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer, int32_t n_i
 * \brief        Calculate the heart rate and SpO2 level
 * \par          Details
 *               By detecting  peaks of PPG cycle and corresponding AC/DC of red/infra-red signal, the an_ratio for the SPO2 is computed.
-*               Since this algorithm is aiming for Arm M0/M3. formaula for SPO2 did not achieve the accuracy due to register overflow.
+*               Since this algorithm is aiming flor Arm M0/M3. formaua for SPO2 did not achieve the accuracy due to register overflow.
 *               Thus, accurate SPO2 is precalculated and save longo uch_spo2_table[] per each an_ratio.
 *
 * \param[in]    *pun_ir_buffer           - IR sensor data buffer
