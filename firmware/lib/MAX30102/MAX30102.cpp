@@ -5,6 +5,12 @@ MAX30102::MAX30102(uint8_t sensorAddress) : Sensor (sensorAddress)
 
 }
 
+MAX30102::~MAX30102()
+{
+    delete [] redSampleBuffer;
+    delete [] irSampleBuffer;
+}
+
 void MAX30102::fifoConfig(uint8_t sampleAverage)
 {
     //Setup the FIFO configuration
@@ -202,7 +208,7 @@ void MAX30102::readStatus()
     readSensorBytes(&control_buffer, 1);
     Serial.printf("LED2 Current %02X\n", control_buffer);
 }
-
+/*
 void MAX30102::rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_t &usedBuffer)
 {
     uint8_t rdPointer, wrPointer;
@@ -259,6 +265,7 @@ void MAX30102::rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_
     }
 
 }
+*/
 
 void MAX30102::rawSpO2ReadOneSample(uint32_t *redSampleRaw, uint32_t *irSampleRaw)
 {   
@@ -294,11 +301,12 @@ void MAX30102::SpO2andHRread(int32_t *HR, int32_t *spo2)
     static bool firstMeasurement = true;
 
     uint8_t bufferSize = 100;
-    uint32_t redSampleBuffer [bufferSize];
-    uint32_t irSampleBuffer [bufferSize];
 
     if(firstMeasurement)
     {
+        redSampleBuffer = new uint32_t [bufferSize];
+        irSampleBuffer = new uint32_t [bufferSize];
+        
         uint8_t numSamplesInBuffer = 0;
 
         while (numSamplesInBuffer < bufferSize)
@@ -309,6 +317,7 @@ void MAX30102::SpO2andHRread(int32_t *HR, int32_t *spo2)
         }
         firstMeasurement = false;
     }
+
 
     int8_t validSPO2, validHeartRate;
     int32_t spo2_new, HR_new;
@@ -340,61 +349,62 @@ void MAX30102::SpO2andHRread(int32_t *HR, int32_t *spo2)
         numSamplesAdded ++;        
     }
 }
-
+/*
 double MAX30102::HRread(uint32_t *irSampleBuffer)
 {
-    // uint32_t redSampleBuffer;
-    // // uint32_t irSampleBuffer;
+    uint32_t redSampleBuffer;
+    // uint32_t irSampleBuffer;
 
-    // static long lastBeat = 0;
+    static long lastBeat = 0;
 
-    // const uint8_t RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
-    // static double rates[RATE_SIZE]; //Array of heart rates
-    // static uint8_t rateSpot = 0;
+    const uint8_t RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
+    static double rates[RATE_SIZE]; //Array of heart rates
+    static uint8_t rateSpot = 0;
     
 
-    // double beatsPerMinute = 0;
-    // static uint16_t beatAvg;      
+    double beatsPerMinute = 0;
+    static uint16_t beatAvg;      
 
-    // rawSpO2ReadOneSample(&redSampleBuffer, irSampleBuffer);
+    rawSpO2ReadOneSample(&redSampleBuffer, irSampleBuffer);
     
-    // if (checkForBeat(*irSampleBuffer) == true)
+    if (checkForBeat(*irSampleBuffer) == true)
+    {
+        //We sensed a beat!
+        long delta = millis() - lastBeat;
+        lastBeat = millis();
+
+        beatsPerMinute = 60 / (delta / 1000.0);
+
+        if (beatsPerMinute < 255 && beatsPerMinute > 20)
+        {
+            rates[rateSpot++] = beatsPerMinute; //Store this reading in the array
+            rateSpot %= RATE_SIZE; //Wrap variable
+
+            //Take average of readings
+            beatAvg = 0;
+            for (byte x = 0 ; x < RATE_SIZE ; x++)
+                beatAvg += rates[x];
+            beatAvg /= RATE_SIZE;
+        }
+    }
+
+
+
+    // if(irSampleBuffer < 50000)
+    //     Serial.print(" No finger?\n");
+    // else
     // {
-    //     //We sensed a beat!
-    //     long delta = millis() - lastBeat;
-    //     lastBeat = millis();
+    //     Serial.print("IR=");
+    //     Serial.print(irSampleBuffer);
+    //     Serial.print(", BPM=");
+    //     Serial.print(beatsPerMinute);
+    //     Serial.print(", Avg BPM=");
+    //     Serial.print(beatAvg);
+    //     Serial.print("\n");
 
-    //     beatsPerMinute = 60 / (delta / 1000.0);
-
-    //     if (beatsPerMinute < 255 && beatsPerMinute > 20)
-    //     {
-    //         rates[rateSpot++] = beatsPerMinute; //Store this reading in the array
-    //         rateSpot %= RATE_SIZE; //Wrap variable
-
-    //         //Take average of readings
-    //         beatAvg = 0;
-    //         for (byte x = 0 ; x < RATE_SIZE ; x++)
-    //             beatAvg += rates[x];
-    //         beatAvg /= RATE_SIZE;
-    //     }
     // }
 
-
-
-    // // if(irSampleBuffer < 50000)
-    // //     Serial.print(" No finger?\n");
-    // // else
-    // // {
-    // //     Serial.print("IR=");
-    // //     Serial.print(irSampleBuffer);
-    // //     Serial.print(", BPM=");
-    // //     Serial.print(beatsPerMinute);
-    // //     Serial.print(", Avg BPM=");
-    // //     Serial.print(beatAvg);
-    // //     Serial.print("\n");
-
-    // // }
-
-    // // return beatsPerMinute;
-    // return beatAvg;
+    // return beatsPerMinute;
+    return beatAvg;
 }
+*/

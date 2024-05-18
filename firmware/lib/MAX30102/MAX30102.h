@@ -42,18 +42,19 @@ class MAX30102 : public Sensor
                 uint16_t SpO2SampleRate,
                 uint8_t SpO2PulseWidth
               );
+    ~MAX30102();
 
     // void SpO2andHRread(uint32_t *redSampleBuffer, uint32_t *irSampleBuffer, uint8_t &usedBuffer);
     void SpO2andHRread(int32_t *HR, int32_t *sp02);
     
-    double HRread(uint32_t *irSampleBuffer);  
+    // double HRread(uint32_t *irSampleBuffer);  
 
     void clearFIFO();
     void reset();
     void readStatus();
 
     private:
-    void rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_t &usedBuffer);
+    // void rawSpO2Read(uint32_t *redSampleRaw, uint32_t *irSampleRaw, uint8_t &usedBuffer);
     void rawSpO2ReadOneSample(uint32_t *redSampleRaw, uint32_t *irSampleRaw);
 
     //Configiration functions
@@ -62,6 +63,9 @@ class MAX30102 : public Sensor
     void ledCurrentConfig(uint8_t typCurrent);
     void SpO2Config(uint8_t SpO2ADCRange, uint16_t SpO2SampleRate, uint8_t SpO2PulseWidth);
 
+    //Variables for SpO2 and HR calculation
+    uint32_t* redSampleBuffer;
+    uint32_t* irSampleBuffer ;
 
 };
 
