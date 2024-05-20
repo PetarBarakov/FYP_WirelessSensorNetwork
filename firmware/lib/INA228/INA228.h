@@ -32,9 +32,9 @@ class INA228 : public Sensor
 
     void init(bool adcRange, uint16_t sampleAverage, uint16_t shuntResistanceVal);
     void readShuntVoltage(double &shuntVoltage);
-    void readBusVoltage(uint32_t &busVoltage);
+    void readBusVoltage(double &busVoltage);
     void readPower(uint32_t &power);
-    void readCurrent(double &current);
+    void readCurrent(int32_t &current);
 
     private:
     void reset();

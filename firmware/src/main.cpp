@@ -18,6 +18,7 @@
 #define SGP41_ADDRESS 0x59
 #define LIS2DE12_ADDRESS 0x18
 
+
 // #include <SPI.h>
 // #define ECG_SPI_MISO 0
 // #define ECG_SPI_MOSI 3
@@ -198,62 +199,69 @@ void setup() {
 
 void loop() {
   // I2CSearchAddr();
+  // double shuntVoltage = 0;
+  // uint32_t busVoltage = 0;
+  // uint32_t power = 0;
+  // double current = 0;
+
+  // InputCurrentSense.readShuntVoltage(shuntVoltage);
+  // InputCurrentSense.readBusVoltage(busVoltage);
+  // InputCurrentSense.readPower(power);
+  // InputCurrentSense.readCurrent(current);
+
+  // Serial.println("-------------Input Current Sensor:--------------");
+  // Serial.printf("Shunt Voltage: %f\n", shuntVoltage);
+  // Serial.printf("Bus Voltage: %d\n", busVoltage);
+  // Serial.printf("Power: %d\n", power);
+  // Serial.printf("Current: %f\n", current);
+  // Serial.println("-----------------------------------------------");
+  // Serial.println();
+
+  // PPGCurrentSense.readShuntVoltage(shuntVoltage);
+  // PPGCurrentSense.readBusVoltage(busVoltage);
+  // PPGCurrentSense.readPower(power);
+  // PPGCurrentSense.readCurrent(current);
+
+  // Serial.println("-------------PPG Current Sensor:--------------");
+  // Serial.printf("Shunt Voltage: %f\n", shuntVoltage);
+  // Serial.printf("Bus Voltage: %d\n", busVoltage);
+  // Serial.printf("Power: %d\n", power);
+  // Serial.printf("Current: %f\n", current);
+  // Serial.println("-----------------------------------------------");
+  // Serial.println();
+
+
   double shuntVoltage = 0;
-  uint32_t busVoltage = 0;
+  double busVoltage_1 = 0;
+  int32_t current_1 = 0;
   uint32_t power = 0;
-  double current = 0;
 
-  InputCurrentSense.readShuntVoltage(shuntVoltage);
-  InputCurrentSense.readBusVoltage(busVoltage);
-  InputCurrentSense.readPower(power);
-  InputCurrentSense.readCurrent(current);
-
-  Serial.println("-------------Input Current Sensor:--------------");
-  Serial.printf("Shunt Voltage: %f\n", shuntVoltage);
-  Serial.printf("Bus Voltage: %d\n", busVoltage);
-  Serial.printf("Power: %d\n", power);
-  Serial.printf("Current: %f\n", current);
-  Serial.println("-----------------------------------------------");
-  Serial.println();
-
-  PPGCurrentSense.readShuntVoltage(shuntVoltage);
-  PPGCurrentSense.readBusVoltage(busVoltage);
-  PPGCurrentSense.readPower(power);
-  PPGCurrentSense.readCurrent(current);
-
-  Serial.println("-------------PPG Current Sensor:--------------");
-  Serial.printf("Shunt Voltage: %f\n", shuntVoltage);
-  Serial.printf("Bus Voltage: %d\n", busVoltage);
-  Serial.printf("Power: %d\n", power);
-  Serial.printf("Current: %f\n", current);
-  Serial.println("-----------------------------------------------");
-  Serial.println();
 
   ESPCurrentSense.readShuntVoltage(shuntVoltage);
-  ESPCurrentSense.readBusVoltage(busVoltage);
+  ESPCurrentSense.readBusVoltage(busVoltage_1);
   ESPCurrentSense.readPower(power);
-  ESPCurrentSense.readCurrent(current);
+  ESPCurrentSense.readCurrent(current_1);
 
   Serial.println("-------------ESP Current Sensor:--------------");
   Serial.printf("Shunt Voltage: %f\n", shuntVoltage);
-  Serial.printf("Bus Voltage: %d\n", busVoltage);
+  Serial.printf("Bus Voltage: %f\n", busVoltage_1);
   Serial.printf("Power: %d\n", power);
-  Serial.printf("Current: %f\n", current);
+  Serial.printf("Current: %d\n", current_1);
   Serial.println("-----------------------------------------------");
   Serial.println();
 
-  SensorsCurrentSense.readShuntVoltage(shuntVoltage);
-  SensorsCurrentSense.readBusVoltage(busVoltage);
-  SensorsCurrentSense.readPower(power);
-  SensorsCurrentSense.readCurrent(current);
+  // SensorsCurrentSense.readShuntVoltage(shuntVoltage);
+  // SensorsCurrentSense.readBusVoltage(busVoltage_1);
+  // SensorsCurrentSense.readPower(power);
+  // SensorsCurrentSense.readCurrent(current_1);
 
-  Serial.println("-------------Sensors Current Sensor:--------------"); 
-  Serial.printf("Shunt Voltage: %f\n", shuntVoltage);
-  Serial.printf("Bus Voltage: %d\n", busVoltage);
-  Serial.printf("Power: %d\n", power);
-  Serial.printf("Current: %f\n", current);
-  Serial.println("-----------------------------------------------");
-  Serial.println();
+  // Serial.println("-------------Sensors Current Sensor:--------------"); 
+  // Serial.printf("Shunt Voltage: %f\n", shuntVoltage);
+  // Serial.printf("Bus Voltage: %fm\n", busVoltage_1);
+  // Serial.printf("Power: %d\n", power);
+  // Serial.printf("Current: %f\n", current_1);
+  // Serial.println("-----------------------------------------------");
+  // Serial.println();
   
   delay(2000);
 }
