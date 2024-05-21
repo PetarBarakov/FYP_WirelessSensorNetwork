@@ -36,10 +36,7 @@ void setup() {
   SPI.setDataMode(SPI_MODE1);
   SPI.setFrequency(1000000);
 
-  delay(2000);
-
-  // ECGSensor.setConfigReg1(0b011);
-
+  ECGSensor.init(500, 6);
 }
 
 
@@ -48,8 +45,8 @@ void loop(){
 
 // // ------------------ ECG Sensor ------------------
 
-  ECGSensor.readConfigReg1();
-  delay(1000);
+  ECGSensor.readData();
+  delay(10);
 
 }
 
