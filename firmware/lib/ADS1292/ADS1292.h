@@ -4,11 +4,6 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#define ECG_SPI_MISO 0
-#define ECG_SPI_MOSI 3
-#define ECG_SPI_SCK 1
-#define ECG_SPI_CS 10
-
 //Commands
 #define ADS1292_WAKEUP 0x02
 #define ADS1292_STANDBY 0x04
@@ -46,10 +41,13 @@
 class ADS1292 {
     
     public:
-    ADS1292();
+    ADS1292(uint8_t ECG_SPI_CS);
     void readConfigReg1();
+    void setConfigReg1(uint8_t sampleRate);
+    void reset();
 
     private:
+    uint8_t SPI_CS;
     
 };
 
