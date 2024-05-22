@@ -7,9 +7,9 @@
 #ifdef ESP32_SENSORS_MEASUREMENT
 
 // #define PROGRAM_TRH_SENSOR
-#define PROGRAM_PPG_SENSOR
+// #define PROGRAM_PPG_SENSOR
 // #define PROGRAM_VOC_SENSOR
-// #define PROGRAM_ACCEL_SENSOR
+#define PROGRAM_ACCEL_SENSOR
 // #define PROGRAM_ECG_SENSOR
 
 
@@ -34,7 +34,7 @@ MAX30102 PPGSensor(MAX30102_ADDRESS);
 // //Initialise an object for the VOC sensor
 // SGP41 VOCSensor(SGP41_ADDRESS);
 
-// LIS2DE12 AccelSensor(LIS2DE12_ADDRESS);
+LIS2DE12 AccelSensor(LIS2DE12_ADDRESS);
 
 // ADS1292 ECGSensor;
 
@@ -65,8 +65,11 @@ void setup() {
   // VOCSensor.executeConditioning(SRAW_VOC_INTIAL);
   // Serial.printf("Initial SRAW VOC: %d\n", SRAW_VOC_INTIAL);
 
-  // AccelSensor.init(100, 2); //Sampler rate of 100Hz and scale of 2g
-
+  #ifdef PROGRAM_ACCEL_SENSOR
+  AccelSensor.init(100, 2); //Sampler rate of 100Hz and scale of 2g
+  #endif //PROGRAM_ACCEL_SENSOR
+  
+  
   // I2CSearchInit();
 
   //Initialise the BLE communication
@@ -129,18 +132,21 @@ void loop() {
   // Serial.printf("VOC: %f \t NOX: %f\n", vocOut, noxOut);
 
 // ------------ Accelerometer ------------
+  #ifdef PROGRAM_ACCEL_SENSOR
 
-  // double xAccel[32], yAccel[32], zAccel[32];
-  // uint8_t numSamples = 0;
+  double xAccel[32], yAccel[32], zAccel[32];
+  uint8_t numSamples = 0;
 
-  // AccelSensor.readAcceleration(xAccel, yAccel, zAccel, &numSamples);
+  AccelSensor.readAcceleration(xAccel, yAccel, zAccel, &numSamples);
 
-  // for(uint8_t i = 0; i < numSamples; i++)
-  // {
-  //   Serial.printf("X: %f \t Y: %f \t Z: %f\n", xAccel[i], yAccel[i], zAccel[i]);
-  // }
-  // Serial.println("....................");
+  for(uint8_t i = 0; i < numSamples; i++)
+  {
+    Serial.printf("X: %f \t Y: %f \t Z: %f\n", xAccel[i], yAccel[i], zAccel[i]);
+  }
+  Serial.println("....................");
 
+  delay(1000);
+  #endif //PROGRAM_ACCEL_SENSOR
 
 // ------------------ ECG Sensor ------------------
 

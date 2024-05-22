@@ -121,7 +121,9 @@ void LIS2DE12::readFifoData(int16_t* x, int16_t* y, int16_t* z, uint8_t* numSamp
     writeSensor1Byte(LIS2DE12_FIFO_SRC_REG);
     uint8_t FifoSrcBuffer = 0;
     readSensorBytes(&FifoSrcBuffer, 1);
-    *numSamples = FifoSrcBuffer & 0b00001111;
+    *numSamples = FifoSrcBuffer & 0b00011111;
+
+    // Serial.printf("Number of samples in FIFO: %02X\n", FifoSrcBuffer);
     
     //read all data from FIFO
     uint8_t rxBuffer[7];
@@ -135,6 +137,8 @@ void LIS2DE12::readFifoData(int16_t* x, int16_t* y, int16_t* z, uint8_t* numSamp
         y[i] = (int16_t)(rxBuffer[4] << 8 | rxBuffer[3]);
         z[i] = (int16_t)(rxBuffer[6] << 8 | rxBuffer[5]);
     }
+
+    Serial.printf("Status: %02X\n", rxBuffer[1]);
 }
 
 void LIS2DE12::setFIFOMode()
