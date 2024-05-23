@@ -18,33 +18,41 @@
 #define SGP41_ADDRESS 0x59
 #define LIS2DE12_ADDRESS 0x18
 
+#define ECG_SPI_MISO 0
+#define ECG_SPI_MOSI 3
+#define ECG_SPI_SCK 1
+#define ECG_SPI_CS 10
 
-// #include <SPI.h>
-// #define ECG_SPI_MISO 0
-// #define ECG_SPI_MOSI 3
-// #define ECG_SPI_SCK 1
-// #define ECG_SPI_CS 10
-
-publisherBLE node1BLE("FYP_SensorNode0"); //Initialise an object for the BLE transmission
-SHT40 TRHSensor(SHT40_ADDRESS); //Intialise an object to the temperature and relative humidity sensor
+//Initialise an object for the BLE communication
+publisherBLE node1BLE("FYP_SensorNode0");
 
 // //Initialise an object for the PPG sensor
+#ifdef PROGRAM_PPG_SENSOR
 MAX30102 PPGSensor(MAX30102_ADDRESS);
+#endif //PROGRAM_PPG_SENSOR
 
 // //Initialise an object for the VOC sensor
+#ifdef PROGRAM_VOC_SENSOR
 // SGP41 VOCSensor(SGP41_ADDRESS);
+#endif //PROGRAM_VOC_SENSOR
 
+
+//Initialise Acclelerometer
+#ifdef PROGRAM_ACCEL_SENSOR
 LIS2DE12 AccelSensor(LIS2DE12_ADDRESS);
+#endif //PROGRAM_ACCEL_SENSOR
 
-// ADS1292 ECGSensor;
+//Initialise ECG Sensor
+#ifdef PROGRAM_ECG_SENSOR
+ADS1292 ECGSensor(ECG_SPI_CS);
+#endif //PROGRAM_ECG_SENSOR
 
 void setup() {
   //Initialise Serial communication
   Serial.begin(115200);
+  //Initialise the BLE communication
+  node1BLE.BLEinit();
 
-  //Initialise I2C communication
-  Wire.setPins(pinSDA, pinSCL);
-  Wire.begin();
 
   // delay(5000);
 
@@ -60,23 +68,26 @@ void setup() {
 
   #endif //PROGRAM_PPG_SENSOR
 
-
+  #ifdef PROGRAM_VOC_SENSOR
   // uint16_t SRAW_VOC_INTIAL = 0;
   // VOCSensor.executeConditioning(SRAW_VOC_INTIAL);
   // Serial.printf("Initial SRAW VOC: %d\n", SRAW_VOC_INTIAL);
+  #endif //PROGRAM_VOC_SENSOR
 
   #ifdef PROGRAM_ACCEL_SENSOR
   AccelSensor.init(1, 2); //Sampler rate of 100Hz and scale of 2g
   #endif //PROGRAM_ACCEL_SENSOR
-  
-  
-  // I2CSearchInit();
 
-  //Initialise the BLE communication
-  node1BLE.BLEinit();
+  #ifdef PROGRAM_ECG_SENSOR
+  SPI.begin(ECG_SPI_SCK, ECG_SPI_MISO, ECG_SPI_MOSI, ECG_SPI_CS);
+  SPI.setBitOrder(MSBFIRST);
+  SPI.setDataMode(SPI_MODE1);
+  SPI.setFrequency(1000000);
+  pinMode(ECG_SPI_CS, OUTPUT);
+  digitalWrite(ECG_SPI_CS, HIGH);
 
-  // PPGSensor.clearFIFO();
-
+  ECGSensor.init(250, 8);
+  #endif //PROGRAM_ECG_SENSOR
 }
 
 void loop() {
@@ -148,13 +159,15 @@ void loop() {
   // delay(1000);
   #endif //PROGRAM_ACCEL_SENSOR
 
-// ------------------ ECG Sensor ------------------
 
-  // ECGSensor.readConfigReg1();
-  // delay(10);
+  // ------------------ ECG Sensor ------------------
 
-  // delay(1);
+  #ifdef PROGRAM_ECG_SENSOR
 
+  ECGSensor.readData();
+  delay(10);
+
+  #endif //PROGRAM_ECG_SENSOR
 }
 
 
