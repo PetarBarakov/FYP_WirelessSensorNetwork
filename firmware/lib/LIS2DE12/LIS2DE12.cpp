@@ -56,7 +56,7 @@ void LIS2DE12::setSampleRate(uint16_t sampleRate)
         break;
     }
 
-    uint8_t rxBuffer = sampleRateBits << 4 | axisEN;
+    uint8_t rxBuffer = (sampleRateBits << 4 ) | axisEN;
 
     writeToReg(LIS2DE12_CTRL_REG1, rxBuffer);
 }
@@ -109,39 +109,19 @@ void LIS2DE12::setFIFO()
 
 void LIS2DE12::init(uint16_t sampleRate, uint8_t inputScale)
 {
+    reset();
     setSampleRate(sampleRate);
     setScale(inputScale);
     setFIFO();
-    setFIFOMode();
+    setFIFOMode(FIFO_STREAM_MODE);
 }
 
 void LIS2DE12::readFifoData(int16_t* x, int16_t* y, int16_t* z, uint8_t* numSamples)
 {
-    //read number of samples in FIFO
-    writeSensor1Byte(LIS2DE12_FIFO_SRC_REG);
-    uint8_t FifoSrcBuffer = 0;
-    readSensorBytes(&FifoSrcBuffer, 1);
-    *numSamples = FifoSrcBuffer & 0b00011111;
 
-    // Serial.printf("Number of samples in FIFO: %02X\n", FifoSrcBuffer);
-    
-    //read all data from FIFO
-    uint8_t rxBuffer[7];
-    writeSensor1Byte(LIS2DE12_FIFO_READ_START);
-
-    for(uint8_t i = 0; i < *numSamples; i++)
-    {
-        readSensorBytes(rxBuffer, 7);
-
-        x[i] = (int16_t)(rxBuffer[2] << 8 | rxBuffer[1]);
-        y[i] = (int16_t)(rxBuffer[4] << 8 | rxBuffer[3]);
-        z[i] = (int16_t)(rxBuffer[6] << 8 | rxBuffer[5]);
-    }
-
-    Serial.printf("Status: %02X\n", rxBuffer[1]);
 }
 
-void LIS2DE12::setFIFOMode()
+void LIS2DE12::setFIFOMode(uint8_t mode)
 {
     // FIFO mode set by FMODE bits:
     // 0b00        --> Bypass mode
@@ -150,21 +130,58 @@ void LIS2DE12::setFIFOMode()
     // 0b11        --> Stream-to-FIFO mode
 
     //Selection of Stream mode;
-    uint8_t rxBuffer= 0x80; //0b1000 0000
 
-    writeToReg(LIS2DE12_FIFO_CTRL_REG, rxBuffer);
+    writeToReg(LIS2DE12_FIFO_CTRL_REG, mode);
 }
 
 void LIS2DE12::readAcceleration(double* x, double* y, double* z, uint8_t* numSamples)
 {
-    int16_t xRawArray[32], yRawArray[32], zRawArray[32];
+    // setFIFOMode(FIFO_STREAM_MODE);
+    int16_t xRaw, yRaw, zRaw;
+    uint8_t numSamplesRead = 0;
 
-    readFifoData(xRawArray, yRawArray, zRawArray, numSamples);
+    // writeSensor1Byte(LIS2DE12_FIFO_SRC_REG);
+    // readSensorBytes(&numSamplesRead, 1);
+    // numSamplesRead = numSamplesRead & 0x1F;
+    // Serial.printf("%d\n",numSamplesRead);
 
-    for(uint8_t i = 0; i < *numSamples; i++)
-    {
-        x[i] = (double)xRawArray[i] * scale / 32768;
-        y[i] = (double)yRawArray[i] * scale / 32768;
-        z[i] = (double)zRawArray[i] * scale / 32768;
-    }
+    // for(uint8_t i = 0; i < numSamplesRead; i++)
+    // {
+        writeSensor1Byte(LIS2DE12_FIFO_READ_START);
+        uint8_t rxBuffer[6];
+        readSensorBytes(rxBuffer, 6);
+
+        xRaw += (int8_t) (rxBuffer[1]);
+        yRaw += (int8_t) (rxBuffer[3]);
+        zRaw += (int8_t) (rxBuffer[5]);
+        Serial.printf("%d \t %d \t %d\n", xRaw, yRaw, zRaw);
+        
+        uint8_t rxBuff;
+        writeSensor1Byte(LIS2DE12_OUT_X);
+        readSensorBytes(&rxBuff, 1);
+
+        Serial.printf("%02X\n", rxBuff);
+
+        // Serial.printf("%d %d %d %d %d %d\n", rxBuffer[0], rxBuffer[1], rxBuffer[2], rxBuffer[3], rxBuffer[4], rxBuffer[5]);        
+    // }
+
+
+    *x = (double) xRaw * scale / 32768;
+    *y = (double) yRaw * scale / 32768;
+    *z = (double) zRaw * scale / 32768;
+
+
+    // writeSensor1Byte(LIS2DE12_FIFO_CTRL_REG);
+    // uint8_t rxBuff;
+    // readSensorBytes(&rxBuff, 1);
+    // Serial.printf("\t %02X\n", rxBuff);
+
+
+    delay(500);
+}
+
+void LIS2DE12::reset()
+{
+    writeToReg(LIS2DE12_CTRL_REG5, 0x80);
+    setFIFOMode(FIFO_BYPASS_MODE);
 }

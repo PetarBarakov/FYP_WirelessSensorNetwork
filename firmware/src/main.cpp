@@ -66,7 +66,7 @@ void setup() {
   // Serial.printf("Initial SRAW VOC: %d\n", SRAW_VOC_INTIAL);
 
   #ifdef PROGRAM_ACCEL_SENSOR
-  AccelSensor.init(100, 2); //Sampler rate of 100Hz and scale of 2g
+  AccelSensor.init(1, 2); //Sampler rate of 100Hz and scale of 2g
   #endif //PROGRAM_ACCEL_SENSOR
   
   
@@ -134,18 +134,18 @@ void loop() {
 // ------------ Accelerometer ------------
   #ifdef PROGRAM_ACCEL_SENSOR
 
-  double xAccel[32], yAccel[32], zAccel[32];
+  double xAccel, yAccel, zAccel;
   uint8_t numSamples = 0;
 
-  AccelSensor.readAcceleration(xAccel, yAccel, zAccel, &numSamples);
+  AccelSensor.readAcceleration(&xAccel, &yAccel, &zAccel, &numSamples);
 
-  for(uint8_t i = 0; i < numSamples; i++)
-  {
-    Serial.printf("X: %f \t Y: %f \t Z: %f\n", xAccel[i], yAccel[i], zAccel[i]);
-  }
-  Serial.println("....................");
+  // // for(uint8_t i = 0; i < numSamples; i++)
+  // // {
+  // Serial.printf("X: %f \t Y: %f \t Z: %f\n", *xAccel, *yAccel, *zAccel);
+  // Serial.println("....................");
+  // // }
 
-  delay(1000);
+  // delay(1000);
   #endif //PROGRAM_ACCEL_SENSOR
 
 // ------------------ ECG Sensor ------------------
