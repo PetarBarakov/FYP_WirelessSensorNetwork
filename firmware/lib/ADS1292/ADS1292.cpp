@@ -14,6 +14,7 @@ void ADS1292::init(uint16_t sampleRate, uint8_t gain)
     setConfigReg1(sampleRate);
     setChannel1(gain);
     setChannel2();
+    // enableInternalReference(false);
 }
 
 void ADS1292::writeRegister(uint8_t reg, uint8_t data)
@@ -137,6 +138,12 @@ void ADS1292::setChannel2()
     writeRegister(ADS1292_CH2SET_REG, 0b10000001);
 }
 
+void ADS1292::enableInternalReference(bool enable)
+{
+    if(enable) writeRegister(ADS1292_CONFIG2_REG, 0b10110000);
+    else writeRegister(ADS1292_CONFIG2_REG, 0b10000000);
+}
+
 /*void ADS1292::readConfigReg1() {
     
 
@@ -174,7 +181,8 @@ void ADS1292::readData() {
     }
     digitalWrite(SPI_CS, HIGH);
 
-    int32_t ch1_data = rxdata[3] << 16 | rxdata[4] << 8 | rxdata[5];
+    int32_t ch1_data = (int32_t) (rxdata[3] << 16 | rxdata[4] << 8 | rxdata[5]);
 
     Serial.printf("Data: %d\n", ch1_data);
+    delay(10);
 }

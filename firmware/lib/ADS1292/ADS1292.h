@@ -26,7 +26,7 @@
 
 //Registers---------------------------------------------------------------
 #define ADS1292_CONFIG1_REG 0x01        //-> Conversion Mode and Data Rate
-// #define ADS1292_CONFIG2_REG 0x02     //-> Lead-off Detection Control
+#define ADS1292_CONFIG2_REG 0x02     //-> Lead-off Detection Control
 // #define ADS1292_LOFF_REG 0x03        //-> Lead-off Status
 #define ADS1292_CH1SET_REG 0x04         //-> Channel 1 Settings
 #define ADS1292_CH2SET_REG 0x05         //-> Channel 2 Settings
@@ -49,6 +49,7 @@ class ADS1292 {
     void setConfigReg1(uint16_t sampleRate);
     void setChannel1(uint8_t gain);
     void setChannel2();
+    void enableInternalReference(bool enable);
     // void readConfigReg1();
 
     //SPI help functions

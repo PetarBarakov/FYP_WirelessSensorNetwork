@@ -36,7 +36,7 @@ void setup() {
   SPI.setDataMode(SPI_MODE1);
   SPI.setFrequency(1000000);
 
-  ECGSensor.init(500, 6);
+  ECGSensor.init(250, 8);
 }
 
 
