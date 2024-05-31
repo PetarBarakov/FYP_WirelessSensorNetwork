@@ -67,7 +67,7 @@ def animate(i, tempSamples, humidSamples, timeLen, tempLine, humidLine, tempRang
 def plot ():
 
     # Parameters
-    timeLen = 200         # Number of points to display
+    timeLen = 600         # Number of points to display
     tempRange = [24, 26]  # Range of possible Y values to display
     humidRange = [44, 46]  # Range of possible Y values to display
 
@@ -75,7 +75,7 @@ def plot ():
     fig = plt.figure()
     tempax = fig.add_subplot(1, 1, 1)
     humidax = tempax.twinx()
-    timeSamples = list(range(0, 200))
+    timeSamples = list(range(0, timeLen))
     tempSamples = [0] * timeLen
     humidSamples = [0] * timeLen
     tempax.set_ylim(tempRange)

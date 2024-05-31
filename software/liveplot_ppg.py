@@ -7,7 +7,7 @@ import asyncio
 import threading
 
 # This function is called periodically from FuncAnimation
-def animate(i, HRSamples, SpO2Samples, timeLen, HRLine, SpO2Line, HRRange, SpO2Range, HRax, SpO2ax):
+def animate(i, HRSamples, SpO2Samples, timeLen, HRLine, SpO2Line, HRax, SpO2ax):
 
     HR = BLE_receiver.HR_val
     SpO2 = BLE_receiver.SpO2_val
@@ -24,17 +24,15 @@ def animate(i, HRSamples, SpO2Samples, timeLen, HRLine, SpO2Line, HRRange, SpO2R
     SpO2Line.set_ydata(SpO2Samples)
 
     # Adjust y-axis limits
-    HRax.set_ylim(min(HRSamples)-100, max(HRSamples)+100)
-    SpO2ax.set_ylim(min(SpO2Samples)-100, max(SpO2Samples)+100)
+    HRax.set_ylim(0, 150)
+    SpO2ax.set_ylim(0, 110)
 
-    return HRLine, SpO2Line, 
+    return HRLine, SpO2Line
 
 def plot ():
 
     # Parameters
     timeLen = 200         # Number of points to display
-    HRRange = [2260000, 2260000]  # Range of possible Y values to display
-    SpO2Range = [2700000, 2700000]  # Range of possible Y values to display
 
     # Create figure for plotting
     fig = plt.figure()
@@ -43,8 +41,6 @@ def plot ():
     timeSamples = list(range(0, timeLen))
     HRSamples = [0] * timeLen
     SpO2Samples = [0] * timeLen
-    # HRax.set_ylim(HRRange)
-    # SpO2ax.set_ylim(SpO2Range)
 
     # Create a blank line. We will update the line in animate
     HRLine, = HRax.plot(timeSamples, HRSamples, color='blue')
@@ -52,17 +48,17 @@ def plot ():
 
     # Add labels
     plt.title('PPG Data')
-    plt.xlabel('SpO2 Samples')
+    plt.xlabel('PPG Samples')
     HRax.set_ylabel('HR')
     SpO2ax.set_ylabel('SpO2')
 
-    plt.legend([HRLine, SpO2Line], ['HR', 'SpO2'])
+    plt.legend([HRLine, SpO2Line], ['HR', 'SpO2'], loc='lower right')
 
     # Set up plot to call animate() function periodically
     ani = animation.FuncAnimation(fig,
         animate,
-        fargs=(HRSamples, SpO2Samples, timeLen, HRLine, SpO2Line, HRRange, SpO2Range, HRax, SpO2ax),
-        interval=BLE_receiver.samplingRate*1000,
+        fargs=(HRSamples, SpO2Samples, timeLen, HRLine, SpO2Line, HRax, SpO2ax),
+        interval=200,
         blit=True)
     plt.show()
 
