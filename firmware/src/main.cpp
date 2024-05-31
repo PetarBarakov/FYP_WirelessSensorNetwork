@@ -7,10 +7,10 @@
 #ifdef ESP32_SENSORS_MEASUREMENT
 
 // #define PROGRAM_TRH_SENSOR
-#define PROGRAM_PPG_SENSOR
+// #define PROGRAM_PPG_SENSOR
 // #define PROGRAM_VOC_SENSOR
 // #define PROGRAM_ACCEL_SENSOR
-// #define PROGRAM_ECG_SENSOR
+#define PROGRAM_ECG_SENSOR
 
 
 #define SHT40_ADDRESS 0x44
@@ -51,14 +51,16 @@ ADS1292 ECGSensor(ECG_SPI_CS);
 #endif //PROGRAM_ECG_SENSOR
 
 void setup() {
-  //Initialise Serial communication
+  //Initialise Serial 
   Serial.begin(115200);
   //Initialise the BLE communication
   node1BLE.BLEinit();
 
   //Initialise I2C communication
+  #ifndef PROGRAM_ECG_SENSOR
   Wire.setPins(pinSDA, pinSCL);
   Wire.begin();
+  #endif //PROGRAM_ECG_SENSOR
   // delay(5000);
 
   //Iniitalise PPG Sensor
@@ -175,8 +177,9 @@ void loop() {
 
   #ifdef PROGRAM_ECG_SENSOR
 
-  ECGSensor.readData();
-  delay(10);
+  uint32_t ECGsampleTimeStamp = millis();
+
+  if(ECGsampleTimeStamp % 10 == 0) ECGSensor.readData();
 
   #endif //PROGRAM_ECG_SENSOR
 }
