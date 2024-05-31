@@ -6,10 +6,10 @@
 
 #ifdef ESP32_SENSORS_MEASUREMENT
 
-// #define PROGRAM_TRH_SENSOR
+#define PROGRAM_TRH_SENSOR
 // #define PROGRAM_PPG_SENSOR
 // #define PROGRAM_VOC_SENSOR
-#define PROGRAM_ACCEL_SENSOR
+// #define PROGRAM_ACCEL_SENSOR
 // #define PROGRAM_ECG_SENSOR
 
 
@@ -36,6 +36,9 @@ MAX30102 PPGSensor(MAX30102_ADDRESS);
 // SGP41 VOCSensor(SGP41_ADDRESS);
 #endif //PROGRAM_VOC_SENSOR
 
+#ifdef PROGRAM_TRH_SENSOR
+SHT40 TRHSensor(SHT40_ADDRESS);
+#endif //PROGRAM_TRH_SENSOR
 
 //Initialise Acclelerometer
 #ifdef PROGRAM_ACCEL_SENSOR
@@ -53,7 +56,9 @@ void setup() {
   //Initialise the BLE communication
   node1BLE.BLEinit();
 
-
+  //Initialise I2C communication
+  Wire.setPins(pinSDA, pinSCL);
+  Wire.begin();
   // delay(5000);
 
   //Iniitalise PPG Sensor
@@ -98,14 +103,20 @@ void loop() {
   #ifdef PROGRAM_TRH_SENSOR
 
   double temp, rh;
-  TRHSensor.readTempHumid(temp, rh);
+  uint32_t TRHsampleTimeStamp = millis();
+  
+  if(TRHsampleTimeStamp % 200 == 0)
+  {
+    TRHSensor.readTempHumid(temp, rh);
 
-  //Transmit TRH data
-  char TRHmessage[32];
-  sprintf(TRHmessage, "%f,%f", temp, rh);
-  node1BLE.BLEsendValue(TRHmessage);
 
-  Serial.printf("TEMP: %f \t RH: %f \t", temp, rh);
+    //Transmit TRH data
+    char TRHmessage[32];
+    sprintf(TRHmessage, "%f,%f", temp, rh);
+    node1BLE.BLEsendValue(TRHmessage);
+
+    Serial.printf("TEMP: %f \t RH: %f \n", temp, rh);
+  }
   #endif //PROGRAM_TRH_SENSOR
   
 //------------ PPG Sensor ------------  
