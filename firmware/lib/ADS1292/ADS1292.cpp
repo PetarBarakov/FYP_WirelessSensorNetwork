@@ -181,8 +181,18 @@ void ADS1292::readData() {
     }
     digitalWrite(SPI_CS, HIGH);
 
-    int32_t ch1_data = (int32_t) (rxdata[3] << 16 | rxdata[4] << 8 | rxdata[5]);
+    uint32_t u32_ch1_data = (uint32_t) (rxdata[3] << 16 | rxdata[4] << 8 | rxdata[5]);
 
-    Serial.printf("Data: %d\n", ch1_data);
+    int32_t s32_ch1_data = (int32_t) (u32_ch1_data >> 8);
+    int16_t s16_ch1_data = (int16_t) s32_ch1_data << 8;
+
+    int16_t ecg_data_filtered;
+    
+    filterAndConv.ECG_ProcessCurrSample(&s16_ch1_data, &ecg_data_filtered);
+
+    uint8_t ecgHR;
+    filterAndConv.QRS_Algorithm_Interface(ecg_data_filtered, &ecgHR);
+
+    Serial.printf("Data: %d \t Filtered: %d \n", ecgHR, ecg_data_filtered);
     delay(10);
 }

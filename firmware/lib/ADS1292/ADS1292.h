@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+#include "ecgRespirationAlgo.h"
 
 //Commands---------------------------------------------------------------
 #define ADS1292_WAKEUP 0x02
@@ -58,6 +59,7 @@ class ADS1292 {
     
     
     uint8_t SPI_CS;
+    ecg_respiration_algorithm filterAndConv;
 };
 
 #endif

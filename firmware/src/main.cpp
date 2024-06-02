@@ -93,7 +93,7 @@ void setup() {
   pinMode(ECG_SPI_CS, OUTPUT);
   digitalWrite(ECG_SPI_CS, HIGH);
 
-  ECGSensor.init(250, 8);
+  ECGSensor.init(250, 6); // Sample rate of 250Hz and gain of 6
   #endif //PROGRAM_ECG_SENSOR
 }
 
