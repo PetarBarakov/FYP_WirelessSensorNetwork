@@ -93,7 +93,7 @@ void setup() {
   pinMode(ECG_SPI_CS, OUTPUT);
   digitalWrite(ECG_SPI_CS, HIGH);
 
-  ECGSensor.init(250, 6); // Sample rate of 250Hz and gain of 6
+  ECGSensor.init(250, 6); //Sampling Rate, Gain
   #endif //PROGRAM_ECG_SENSOR
 }
 
@@ -105,10 +105,11 @@ void loop() {
   #ifdef PROGRAM_TRH_SENSOR
 
   double temp, rh;
-  uint32_t TRHsampleTimeStamp = millis();
+  static uint32_t TRHsampleTimeStamp = millis();
   
-  if(TRHsampleTimeStamp % 200 == 0)
+  if(TRHsampleTimeStamp - millis() >= 200)
   {
+    TRHsampleTimeStamp = millis();
     TRHSensor.readTempHumid(temp, rh);
 
 
@@ -179,7 +180,11 @@ void loop() {
 
   uint32_t ECGsampleTimeStamp = millis();
 
-  if(ECGsampleTimeStamp % 10 == 0) ECGSensor.readData();
+  // if(ECGsampleTimeStamp - millis() >= 30) 
+  // {
+    ECGsampleTimeStamp = millis();
+    ECGSensor.readHR();
+  // }
 
   #endif //PROGRAM_ECG_SENSOR
 }

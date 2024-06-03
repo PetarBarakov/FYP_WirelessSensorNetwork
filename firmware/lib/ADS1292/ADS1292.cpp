@@ -169,7 +169,22 @@ void ADS1292::enableInternalReference(bool enable)
     // SPI.endTransaction();
 }*/
 
-void ADS1292::readData() {
+uint8_t ADS1292::readHR() {
+    
+    int32_t s32_ch1_data = readRawECG();
+
+    int16_t ecg_data_filtered = filterECG(s32_ch1_data);
+
+    uint8_t ecgHR = 0;
+    filterAndConv.QRS_Algorithm_Interface(ecg_data_filtered, &ecgHR);
+
+    Serial.printf("Data: %d \t Filtered: %d \n", ecgHR, ecg_data_filtered);
+
+    delay(10);
+    return ecgHR;
+}
+
+int32_t ADS1292::readRawECG() {
     sendCommand(ADS1292_RDATA);
 
     uint8_t rxdata[9];
@@ -184,15 +199,16 @@ void ADS1292::readData() {
     uint32_t u32_ch1_data = (uint32_t) (rxdata[3] << 16 | rxdata[4] << 8 | rxdata[5]);
 
     int32_t s32_ch1_data = (int32_t) (u32_ch1_data >> 8);
-    int16_t s16_ch1_data = (int16_t) s32_ch1_data << 8;
+
+    return s32_ch1_data;
+}
+
+int16_t ADS1292::filterECG(uint32_t ecgValue) {
+    int16_t s16_ch1_data = (int16_t) ecgValue << 8;
 
     int16_t ecg_data_filtered;
     
     filterAndConv.ECG_ProcessCurrSample(&s16_ch1_data, &ecg_data_filtered);
 
-    uint8_t ecgHR;
-    filterAndConv.QRS_Algorithm_Interface(ecg_data_filtered, &ecgHR);
-
-    Serial.printf("Data: %d \t Filtered: %d \n", ecgHR, ecg_data_filtered);
-    delay(10);
+    return ecg_data_filtered;
 }
