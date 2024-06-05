@@ -169,17 +169,27 @@ void loop() {
   #ifdef PROGRAM_ACCEL_SENSOR
 
   double xAccel, yAccel, zAccel;
-  uint8_t numSamples = 0;
+  bool movementDetected = false;
 
-  AccelSensor.readAcceleration(&xAccel, &yAccel, &zAccel, &numSamples);
+  AccelSensor.readAcceleration(&xAccel, &yAccel, &zAccel);
+  movementDetected = AccelSensor.detectMovement(xAccel, yAccel, zAccel);
 
-  // // for(uint8_t i = 0; i < numSamples; i++)
-  // // {
-  // Serial.printf("X: %f \t Y: %f \t Z: %f\n", *xAccel, *yAccel, *zAccel);
-  // Serial.println("....................");
-  // // }
+  static uint32_t AccelSampleTimeStamp = millis();
 
-  // delay(1000);
+  if (millis() - AccelSampleTimeStamp >= 100)
+  {
+    AccelSampleTimeStamp = millis();
+    Serial.printf("X: %f \t Y: %f \t Z: %f \t Movement: %d\n", xAccel, yAccel, zAccel, movementDetected);
+  }
+
+  if(movementDetected)
+  {
+    char Accelmessage[32];
+    sprintf(Accelmessage, "%f", true);
+    node1BLE.BLEsendValue(Accelmessage);
+  }
+
+
   #endif //PROGRAM_ACCEL_SENSOR
 
 

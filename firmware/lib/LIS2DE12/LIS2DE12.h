@@ -35,14 +35,14 @@ class LIS2DE12 : public Sensor{
     public:
     LIS2DE12(uint8_t sensorAddress);
     void init(uint16_t sampleRate, uint8_t inputScale);
-    void readAcceleration(double* x, double* y, double* z, uint8_t* numSamples);
+    void readAcceleration(double* x, double* y, double* z);
+    bool detectMovement(double x, double y, double z);
 
     private:
     void setSampleRate(uint16_t sampleRate);
     void setScale(uint8_t inputscale);
     void setFIFO();
     void setFIFOMode(uint8_t mode);
-    void readFifoData(int16_t* x, int16_t* y, int16_t* z, uint8_t* numSamples);
     void reset();
 
 
