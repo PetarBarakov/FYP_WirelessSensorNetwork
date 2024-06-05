@@ -169,18 +169,12 @@ void ADS1292::enableInternalReference(bool enable)
     // SPI.endTransaction();
 }*/
 
-uint8_t ADS1292::readHR() {
-    
-    int32_t s32_ch1_data = readRawECG();
-
-    int16_t ecg_data_filtered = filterECG(s32_ch1_data);
+uint8_t ADS1292::readHR(int16_t ecg_data_filtered)
+{
 
     uint8_t ecgHR = 0;
     filterAndConv.QRS_Algorithm_Interface(ecg_data_filtered, &ecgHR);
 
-    Serial.printf("Data: %d \t Filtered: %d \n", ecgHR, ecg_data_filtered);
-
-    delay(10);
     return ecgHR;
 }
 

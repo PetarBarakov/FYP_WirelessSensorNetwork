@@ -44,7 +44,9 @@ class ADS1292 {
     public:
     ADS1292(uint8_t ECG_SPI_CS);
     void init(uint16_t sampleRate, uint8_t gain);
-    uint8_t readHR();
+    uint8_t readHR(int16_t ecg_data_filtered);
+    int32_t readRawECG();
+    int16_t filterECG(uint32_t ecgValue);
 
     private:
     void setConfigReg1(uint16_t sampleRate);
@@ -56,8 +58,6 @@ class ADS1292 {
     //SPI help functions
     void writeRegister(uint8_t reg, uint8_t data);
     void sendCommand(uint8_t command);
-    int32_t readRawECG();
-    int16_t filterECG(uint32_t ecgValue);
     
     
     uint8_t SPI_CS;

@@ -9,8 +9,8 @@
 // #define PROGRAM_TRH_SENSOR
 // #define PROGRAM_PPG_SENSOR
 // #define PROGRAM_VOC_SENSOR
-#define PROGRAM_ACCEL_SENSOR
-// #define PROGRAM_ECG_SENSOR
+// #define PROGRAM_ACCEL_SENSOR
+#define PROGRAM_ECG_SENSOR
 
 
 #define SHT40_ADDRESS 0x44
@@ -199,11 +199,20 @@ void loop() {
 
   static uint32_t ECGsampleTimeStamp = millis();
 
-  // if(millis() - ECGsampleTimeStamp >= 30) 
-  // {
+  int32_t s32_ch1_data = ECGSensor.readRawECG();
+  int16_t ecg_data_filtered = ECGSensor.filterECG(s32_ch1_data);
+  uint8_t ecgHR = ECGSensor.readHR(ecg_data_filtered);
+  
+  if(millis() - ECGsampleTimeStamp >= 1000) 
+  {
     ECGsampleTimeStamp = millis();
-    ECGSensor.readHR();
-  // }
+    Serial.printf("Data: %d \t Filtered: %d \n", ecgHR, ecg_data_filtered);
+
+
+    char ECGmessage[32];
+    sprintf(ECGmessage, "%d", ecgHR);
+    node1BLE.BLEsendValue(ECGmessage);
+  }
 
   #endif //PROGRAM_ECG_SENSOR
 }
