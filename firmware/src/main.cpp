@@ -8,8 +8,8 @@
 
 // #define PROGRAM_TRH_SENSOR
 // #define PROGRAM_PPG_SENSOR
-#define PROGRAM_VOC_SENSOR
-// #define PROGRAM_ACCEL_SENSOR
+// #define PROGRAM_VOC_SENSOR
+#define PROGRAM_ACCEL_SENSOR
 // #define PROGRAM_ECG_SENSOR
 
 
@@ -82,7 +82,7 @@ void setup() {
   #endif //PROGRAM_VOC_SENSOR
 
   #ifdef PROGRAM_ACCEL_SENSOR
-  AccelSensor.init(1, 2); //Sampler rate of 100Hz and scale of 2g
+  AccelSensor.init(100, 2); //Sampler rate of 100Hz and scale of 2g
   #endif //PROGRAM_ACCEL_SENSOR
 
   #ifdef PROGRAM_ECG_SENSOR

@@ -137,7 +137,7 @@ void LIS2DE12::setFIFOMode(uint8_t mode)
 void LIS2DE12::readAcceleration(double* x, double* y, double* z, uint8_t* numSamples)
 {
     // setFIFOMode(FIFO_STREAM_MODE);
-    int16_t xRaw, yRaw, zRaw;
+    int8_t xRaw, yRaw, zRaw;
     uint8_t numSamplesRead = 0;
 
     // writeSensor1Byte(LIS2DE12_FIFO_SRC_REG);
@@ -147,28 +147,37 @@ void LIS2DE12::readAcceleration(double* x, double* y, double* z, uint8_t* numSam
 
     // for(uint8_t i = 0; i < numSamplesRead; i++)
     // {
-        writeSensor1Byte(LIS2DE12_FIFO_READ_START);
-        uint8_t rxBuffer[6];
-        readSensorBytes(rxBuffer, 6);
+        // writeSensor1Byte(LIS2DE12_FIFO_READ_START);
+        // uint8_t rxBuffer[6];
+        // readSensorBytes(rxBuffer, 6);
 
-        xRaw += (int8_t) (rxBuffer[1]);
-        yRaw += (int8_t) (rxBuffer[3]);
-        zRaw += (int8_t) (rxBuffer[5]);
-        Serial.printf("%d \t %d \t %d\n", xRaw, yRaw, zRaw);
+        // xRaw += (int8_t) (rxBuffer[1]);
+        // yRaw += (int8_t) (rxBuffer[3]);
+        // zRaw += (int8_t) (rxBuffer[5]);
+        // Serial.printf("%d \t %d \t %d\n", xRaw, yRaw, zRaw);
         
         uint8_t rxBuff;
         writeSensor1Byte(LIS2DE12_OUT_X);
         readSensorBytes(&rxBuff, 1);
+        xRaw = (int8_t) rxBuff;
 
-        Serial.printf("%02X\n", rxBuff);
+        writeSensor1Byte(LIS2DE12_OUT_Y);
+        readSensorBytes(&rxBuff, 1);
+        yRaw = (int8_t) rxBuff;
+
+        writeSensor1Byte(LIS2DE12_OUT_Z);
+        readSensorBytes(&rxBuff, 1);
+        zRaw = (int8_t) rxBuff;
 
         // Serial.printf("%d %d %d %d %d %d\n", rxBuffer[0], rxBuffer[1], rxBuffer[2], rxBuffer[3], rxBuffer[4], rxBuffer[5]);        
-    // }
+    // } 
 
 
-    *x = (double) xRaw * scale / 32768;
-    *y = (double) yRaw * scale / 32768;
-    *z = (double) zRaw * scale / 32768;
+    *x = (double) xRaw * scale / 256;
+    *y = (double) yRaw * scale / 256;
+    *z = (double) zRaw * scale / 256;
+
+    Serial.printf("X: %f \t Y: %f \t Z: %f\n", *x, *y, *z);
 
 
     // writeSensor1Byte(LIS2DE12_FIFO_CTRL_REG);
@@ -177,7 +186,10 @@ void LIS2DE12::readAcceleration(double* x, double* y, double* z, uint8_t* numSam
     // Serial.printf("\t %02X\n", rxBuff);
 
 
-    delay(500);
+    delay(10);
+    // writeSensor1Byte(LIS2DE12_CTRL_REG4);
+    // readSensorBytes(&rxBuff, 1);
+    // Serial.printf("CTRL REG1 %02X\n", rxBuff);
 }
 
 void LIS2DE12::reset()
