@@ -8,9 +8,9 @@
 
 // #define PROGRAM_TRH_SENSOR
 // #define PROGRAM_PPG_SENSOR
-// #define PROGRAM_VOC_SENSOR
+#define PROGRAM_VOC_SENSOR
 // #define PROGRAM_ACCEL_SENSOR
-#define PROGRAM_ECG_SENSOR
+// #define PROGRAM_ECG_SENSOR
 
 
 #define SHT40_ADDRESS 0x44
@@ -33,7 +33,7 @@ MAX30102 PPGSensor(MAX30102_ADDRESS);
 
 // //Initialise an object for the VOC sensor
 #ifdef PROGRAM_VOC_SENSOR
-// SGP41 VOCSensor(SGP41_ADDRESS);
+SGP41 VOCSensor(SGP41_ADDRESS);
 #endif //PROGRAM_VOC_SENSOR
 
 #ifdef PROGRAM_TRH_SENSOR
@@ -76,9 +76,9 @@ void setup() {
   #endif //PROGRAM_PPG_SENSOR
 
   #ifdef PROGRAM_VOC_SENSOR
-  // uint16_t SRAW_VOC_INTIAL = 0;
-  // VOCSensor.executeConditioning(SRAW_VOC_INTIAL);
-  // Serial.printf("Initial SRAW VOC: %d\n", SRAW_VOC_INTIAL);
+  uint16_t SRAW_VOC_INTIAL = 0;
+  VOCSensor.executeConditioning(SRAW_VOC_INTIAL);
+  Serial.printf("Initial SRAW VOC: %d\n", SRAW_VOC_INTIAL);
   #endif //PROGRAM_VOC_SENSOR
 
   #ifdef PROGRAM_ACCEL_SENSOR
@@ -107,7 +107,7 @@ void loop() {
   double temp, rh;
   static uint32_t TRHsampleTimeStamp = millis();
   
-  if(TRHsampleTimeStamp - millis() >= 200)
+  if(millis() - TRHsampleTimeStamp >= 200)
   {
     TRHsampleTimeStamp = millis();
     TRHSensor.readTempHumid(temp, rh);
@@ -150,11 +150,20 @@ void loop() {
 
 // ------------ VOC Sensor ------------
 
-  // double vocOut = 0, noxOut = 0;
+  #ifdef PROGRAM_VOC_SENSOR
 
-  // VOCSensor.readSample(vocOut, noxOut);
+  int32_t vocOut = 0, noxOut = 0;
 
-  // Serial.printf("VOC: %f \t NOX: %f\n", vocOut, noxOut);
+  static uint32_t VOCSampleTimeStamp = millis();
+
+  if(millis() - VOCSampleTimeStamp >= 1000)
+  {
+    VOCSensor.readSample(vocOut, noxOut);
+    Serial.printf("VOC: %d \t NOX: %d\n", vocOut, noxOut);
+    VOCSampleTimeStamp = millis();
+  }
+
+  #endif //PROGRAM_VOC_SENSOR
 
 // ------------ Accelerometer ------------
   #ifdef PROGRAM_ACCEL_SENSOR
@@ -178,9 +187,9 @@ void loop() {
 
   #ifdef PROGRAM_ECG_SENSOR
 
-  uint32_t ECGsampleTimeStamp = millis();
+  static uint32_t ECGsampleTimeStamp = millis();
 
-  // if(ECGsampleTimeStamp - millis() >= 30) 
+  // if(millis() - ECGsampleTimeStamp >= 30) 
   // {
     ECGsampleTimeStamp = millis();
     ECGSensor.readHR();

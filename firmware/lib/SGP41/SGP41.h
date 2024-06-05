@@ -9,7 +9,7 @@ class SGP41 : public Sensor {
 
     public:
     SGP41(uint8_t sensorAddress);
-    void readSample(double& SRAW_VOC, double& SRAW_NOX);
+    void readSample(int32_t& SRAW_VOC, int32_t& SRAW_NOX);
     void executeConditioning(uint16_t& SRAW_VOC_INTIAL);
     void selftest();
 

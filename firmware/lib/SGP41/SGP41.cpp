@@ -1,4 +1,7 @@
 #include "SGP41.h"
+#include <NOxGasIndexAlgorithm.h>
+#include "VOCGasIndexAlgorithm.h"
+#include <SensirionGasIndexAlgorithm.h>
 
 SGP41::SGP41(uint8_t sensorAddress) : Sensor(sensorAddress) 
 {
@@ -31,8 +34,8 @@ void SGP41::meaureRawSignal(uint16_t& SRAW_VOC, uint16_t& SRAW_NOX)
 
     readSensorBytes(rxBuffer, 6);
 
-    SRAW_VOC = (rxBuffer[1] << 8) | rxBuffer[0];
-    SRAW_NOX = (rxBuffer[4] << 8) | rxBuffer[3];
+    SRAW_VOC = (uint16_t) ( (uint16_t) (rxBuffer[0] << 8) | rxBuffer[1]);
+    SRAW_NOX = (uint16_t) ( (uint16_t) (rxBuffer[3] << 8) | rxBuffer[4]);
 }
 
 void SGP41::turnHeaterOff()
@@ -51,18 +54,22 @@ void SGP41::reset()
     writeSensorBytes(txBytes, 2);
 }
 
-void SGP41::readSample(double& vocOut, double& noxOut)
+void SGP41::readSample(int32_t& vocOut, int32_t& noxOut)
 {
     uint16_t SRAW_VOC, SRAW_NOX;
 
     meaureRawSignal(SRAW_VOC, SRAW_NOX);
 
-    vocOut = SRAW_VOC * 1.0;
-    noxOut = SRAW_NOX * 1.0;
+    VOCGasIndexAlgorithm vocAlgorithm;
+    NOxGasIndexAlgorithm noxAlgorithm;
+
+    Serial.printf("SRAW VOC: %d\t SRAW NOX: %d\n", SRAW_VOC, SRAW_NOX);
+    vocOut = vocAlgorithm.process((int32_t) SRAW_VOC);
+    noxOut = noxAlgorithm.process((int32_t) SRAW_NOX);
 }
 
 // void SGP41::selftest()
-// {
+// {    
 //     uint8_t txBytes [2] = {0x28, 0x0E};
 
 //     //Send the self test command
