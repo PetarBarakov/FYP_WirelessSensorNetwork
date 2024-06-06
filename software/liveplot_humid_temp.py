@@ -116,8 +116,8 @@ if __name__ == "__main__":
 
     DeviceDetected = asyncio.run(BLE_receiver.BLEconnect())
 
-    data_file = open("Data/output.csv", "w")
-    data_file.write("Temperature, Humidity\n")
+    data_file = open("Data/th.csv", "w")
+    data_file.write("Timstamp, Temperature, Humidity\n")
 
     asyncio.run(async_main_temp(device=DeviceDetected, outputFile=data_file))
     # plot()

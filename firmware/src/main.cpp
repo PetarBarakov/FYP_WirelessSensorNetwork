@@ -7,11 +7,17 @@
 
 #ifdef ESP32_SENSORS_MEASUREMENT
 
-// #define PROGRAM_TRH_SENSOR
+#define PROGRAM_TRH_SENSOR
 // #define PROGRAM_PPG_SENSOR
-#define PROGRAM_VOC_SENSOR
+// #define PROGRAM_VOC_SENSOR
 // #define PROGRAM_ACCEL_SENSOR
 // #define PROGRAM_ECG_SENSOR
+// #define PROGRAM_ACC_ECG_SENSOR
+
+#ifdef PROGRAM_ACC_ECG_SENSOR
+#define PROGRAM_ACCEL_SENSOR
+#define PROGRAM_ECG_SENSOR
+#endif //PROGRAM_ACC_ECG_SENSOR
 
 
 #define SHT40_ADDRESS 0x44
@@ -24,8 +30,19 @@
 #define ECG_SPI_SCK 1
 #define ECG_SPI_CS 10
 
+// #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
 //Initialise an object for the BLE communication
-publisherBLE node1BLE("FYP_SensorNode0");
+#define TH_UUID "e87917aa-103e-4d61-a11d-ae0d09963b64"
+#define PPG_UUID "4703e542-0870-4fd7-8685-0dc1b371d700"
+#define VOC_UUID "8c367fd0-fd14-49a8-bf73-d5dfa76f6e1a"
+#define ECG_ACC_UUID "b37a5a9f-97ac-4f36-9f1f-024c0a3e896d"
+
+
+publisherBLE THNode("FYP_TH_Node", TH_UUID);
+// publisherBLE PPGNode("FYP_PPG_Node", PPG_UUID);
+// publisherBLE VOCNode("FYP_VOC_Node", VOC_UUID);
+// publisherBLE ECG_ACC_Node("FYP_ECG_ACC_Node", ECG_ACC_UUID);
 
 // //Initialise an object for the PPG sensor
 #ifdef PROGRAM_PPG_SENSOR
@@ -55,7 +72,10 @@ void setup() {
   //Initialise Serial 
   Serial.begin(115200);
   //Initialise the BLE communication
-  node1BLE.BLEinit();
+  THNode.BLEinit();
+  // PPGNode.BLEinit();
+  // VOCNode.BLEinit();
+  // ECG_ACC_Node.BLEinit();
 
   //Initialise I2C communication
   #ifndef PROGRAM_ECG_SENSOR
@@ -101,8 +121,6 @@ void setup() {
 void loop() {
 
 
-
-
 //------------ Temperature and Relative Humidity Sensor ------------
 
   #ifdef PROGRAM_TRH_SENSOR
@@ -118,8 +136,8 @@ void loop() {
 
     //Transmit TRH data
     char TRHmessage[32];
-    sprintf(TRHmessage, "%f,%f", temp, rh);
-    node1BLE.BLEsendValue(TRHmessage);
+    sprintf(TRHmessage, "%d,%f,%f", TRHsampleTimeStamp, temp, rh);
+    THNode.BLEsendValue(TRHmessage);
 
     Serial.printf("TEMP: %f \t RH: %f \n", temp, rh);
   }
@@ -143,7 +161,7 @@ void loop() {
     //Transmit PPG data
     char PPGmessage[32];
     sprintf(PPGmessage, "%d,%d", HR, SpO2);
-    node1BLE.BLEsendValue(PPGmessage);
+    PPGNode.BLEsendValue(PPGmessage);
     
     PPGstartSampleTime = PPGsampleTimeStamp;
   }
@@ -167,8 +185,8 @@ void loop() {
     VOCSampleTimeStamp = millis();
 
     char VOCmessage[32];
-    sprintf(VOCmessage, "%d,%d,%d,%d", vocOut, noxOut, vocjump, noxjump);
-    node1BLE.BLEsendValue(VOCmessage);
+    sprintf(VOCmessage, "%d,%d,%d,%d,%d", VOCSampleTimeStamp, vocOut, noxOut, vocjump, noxjump);
+    VOCNode.BLEsendValue(VOCmessage);
   }
 
   #endif //PROGRAM_VOC_SENSORss

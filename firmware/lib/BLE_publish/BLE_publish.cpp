@@ -9,9 +9,10 @@ void MyServerCallbacks::onDisconnect(BLEServer* pServer) {
 }
 
 
-publisherBLE::publisherBLE(char* setupName)
+publisherBLE::publisherBLE(char* setupName, char* charUUID)
 {
     BLEname = setupName;
+    UUID = charUUID;
 }
    
 void publisherBLE::BLEinit()
@@ -29,7 +30,7 @@ void publisherBLE::BLEinit()
 
     // Create a BLE Characteristic
     pCharacteristic = pService->createCharacteristic(
-                        CHARACTERISTIC_UUID,
+                        UUID,
                         BLECharacteristic::PROPERTY_NOTIFY
     );
 

@@ -11,7 +11,7 @@
 // Define UUIDs for the Service and for the Characteristic
 // Both should vary from device to device (node to node)
 #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
 
 class MyServerCallbacks: public BLEServerCallbacks {
     public:
@@ -33,11 +33,12 @@ class publisherBLE{
 
 
     char* BLEname;
+    char* UUID;
     MyServerCallbacks* Callbacks_handle;
     
     public:
 
-    publisherBLE(char* setupName);
+    publisherBLE(char* setupName, char* charUUID);
     void BLEinit();
     void BLEsendValue(char* transmitValue);
 
