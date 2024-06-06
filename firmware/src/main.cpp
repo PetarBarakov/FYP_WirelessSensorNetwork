@@ -8,9 +8,9 @@
 
 // #define PROGRAM_TRH_SENSOR
 // #define PROGRAM_PPG_SENSOR
-// #define PROGRAM_VOC_SENSOR
+#define PROGRAM_VOC_SENSOR
 // #define PROGRAM_ACCEL_SENSOR
-#define PROGRAM_ECG_SENSOR
+// #define PROGRAM_ECG_SENSOR
 
 
 #define SHT40_ADDRESS 0x44
@@ -152,18 +152,23 @@ void loop() {
 
   #ifdef PROGRAM_VOC_SENSOR
 
-  int32_t vocOut = 0, noxOut = 0;
+  uint16_t vocOut = 0, noxOut = 0;
+  bool vocjump = false, noxjump = false;
 
   static uint32_t VOCSampleTimeStamp = millis();
 
   if(millis() - VOCSampleTimeStamp >= 1000)
   {
-    VOCSensor.readSample(vocOut, noxOut);
-    Serial.printf("VOC: %d \t NOX: %d\n", vocOut, noxOut);
+    VOCSensor.readSample(vocOut, noxOut, vocjump, noxjump);
+    Serial.printf("VOC: %d \t NOX: %d\t VOC JUMP: %d \t NOX JUMP: %d\n", vocOut, noxOut, vocjump, noxjump);
     VOCSampleTimeStamp = millis();
+
+    char VOCmessage[32];
+    sprintf(VOCmessage, "%d,%d,%d,%d", vocOut, noxOut, vocjump, noxjump);
+    node1BLE.BLEsendValue(VOCmessage);
   }
 
-  #endif //PROGRAM_VOC_SENSOR
+  #endif //PROGRAM_VOC_SENSORss
 
 // ------------ Accelerometer ------------
   #ifdef PROGRAM_ACCEL_SENSOR

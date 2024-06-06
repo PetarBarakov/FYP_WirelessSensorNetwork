@@ -1,7 +1,4 @@
 #include "SGP41.h"
-#include <NOxGasIndexAlgorithm.h>
-#include "VOCGasIndexAlgorithm.h"
-#include <SensirionGasIndexAlgorithm.h>
 
 SGP41::SGP41(uint8_t sensorAddress) : Sensor(sensorAddress) 
 {
@@ -54,18 +51,48 @@ void SGP41::reset()
     writeSensorBytes(txBytes, 2);
 }
 
-void SGP41::readSample(int32_t& vocOut, int32_t& noxOut)
+void SGP41::readSample(uint16_t& vocOut, uint16_t& noxOut, bool& vocjump, bool& noxjump)
 {
-    uint16_t SRAW_VOC, SRAW_NOX;
+    meaureRawSignal(vocOut, noxOut);
 
-    meaureRawSignal(SRAW_VOC, SRAW_NOX);
+    const uint8_t averageBufferize = 10;
 
-    VOCGasIndexAlgorithm vocAlgorithm;
-    NOxGasIndexAlgorithm noxAlgorithm;
+    static uint16_t averageVOCBuffer[averageBufferize] = {0};
+    static uint16_t averageNOXBuffer[averageBufferize] = {0};
 
-    Serial.printf("SRAW VOC: %d\t SRAW NOX: %d\n", SRAW_VOC, SRAW_NOX);
-    vocOut = vocAlgorithm.process((int32_t) SRAW_VOC);
-    noxOut = noxAlgorithm.process((int32_t) SRAW_NOX);
+    uint32_t averageVOC = 0;
+    uint32_t averageNOX = 0;
+
+    for (uint8_t i = 0; i < averageBufferize - 1; i++)
+    {
+        averageVOCBuffer[i] = averageVOCBuffer[i + 1];
+        averageNOXBuffer[i] = averageNOXBuffer[i + 1];
+
+        averageVOC += averageVOCBuffer[i];
+        averageNOX += averageNOXBuffer[i];
+    }
+
+    averageVOCBuffer[averageBufferize - 1] = vocOut;
+    averageNOXBuffer[averageBufferize - 1] = noxOut;
+
+    averageVOC += vocOut;
+    averageNOX += noxOut;
+    averageVOC /= averageBufferize;
+    averageNOX /= averageBufferize;
+
+    const int32_t VOCjumpTH = 1200; 
+    const int32_t NOXjumpTH = 500; 
+
+    // Serial.printf("VOC average: %d \t NOX average: %d\n", averageVOC, averageNOX);
+
+    if(averageVOCBuffer[0] != 0)
+    {
+        if ( ((int32_t) (averageVOC - (uint32_t) vocOut ) > VOCjumpTH) || ( ( (int32_t) (averageVOC - (uint32_t)vocOut)) < -VOCjumpTH)) vocjump = true;
+        else vocjump = false;
+
+        if ( ((int32_t) (averageNOX - (uint32_t) noxOut ) > NOXjumpTH) || ( ( (int32_t) (averageNOX - (uint32_t)noxOut)) < -NOXjumpTH)) noxjump = true;
+        else noxjump = false;
+    }
 }
 
 // void SGP41::selftest()
