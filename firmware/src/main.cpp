@@ -1,5 +1,6 @@
 #include "header.h"
 
+
 // I2C GPIO pins
 #define pinSDA 6 
 #define pinSCL 7 
@@ -98,7 +99,9 @@ void setup() {
 }
 
 void loop() {
-  // I2CSearchAddr();
+
+
+
 
 //------------ Temperature and Relative Humidity Sensor ------------
 
