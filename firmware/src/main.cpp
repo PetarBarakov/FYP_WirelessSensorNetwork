@@ -8,17 +8,11 @@
 #ifdef ESP32_SENSORS_MEASUREMENT
 
 // #define PROGRAM_TRH_SENSOR
-#define PROGRAM_PPG_SENSOR
+// #define PROGRAM_PPG_SENSOR
 // #define PROGRAM_VOC_SENSOR
-// #define PROGRAM_ACCEL_SENSOR
-// #define PROGRAM_ECG_SENSOR
-// #define PROGRAM_ACC_ECG_SENSOR
+#define PROGRAM_ACC_ECG_SENSOR
 
-#ifdef PROGRAM_ACC_ECG_SENSOR
-#define PROGRAM_ACCEL_SENSOR
-#define PROGRAM_ECG_SENSOR
-#endif //PROGRAM_ACC_ECG_SENSOR
-
+// ============= END OF PROGRAMING CONFIGURATION =============
 
 #define SHT40_ADDRESS 0x44
 #define MAX30102_ADDRESS 0x57
@@ -29,8 +23,6 @@
 #define ECG_SPI_MOSI 3
 #define ECG_SPI_SCK 1
 #define ECG_SPI_CS 10
-
-// #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
 //Initialise an object for the BLE communication
 #define TH_UUID "e87917aa-103e-4d61-a11d-ae0d09963b64"
@@ -62,30 +54,23 @@ publisherBLE THNode("FYP_TH_Node", TH_UUID, TH_SERVICE);
 #endif //PROGRAM_TRH_SENSOR
 
 //Initialise Acclelerometer
-#ifdef PROGRAM_ACCEL_SENSOR
+#ifdef PROGRAM_ACC_ECG_SENSOR
 LIS2DE12 AccelSensor(LIS2DE12_ADDRESS);
-#endif //PROGRAM_ACCEL_SENSOR
-
-//Initialise ECG Sensor
-#ifdef PROGRAM_ECG_SENSOR
 ADS1292 ECGSensor(ECG_SPI_CS);
 publisherBLE ECG_ACC_Node("FYP_ECG_ACC_Node", ECG_ACC_UUID, ECG_ACC_SERVICE);
-#endif //PROGRAM_ECG_SENSOR
+#endif //PROGRAM_ACC_ECG_SENSOR
 
 void setup() {
   //Initialise Serial 
   Serial.begin(115200);
-  //Initialise the BLE communication
+  //Initialise I2C communication
+  Wire.setPins(pinSDA, pinSCL);
+  Wire.begin();
+
+
   #ifdef PROGRAM_TRH_SENSOR
   THNode.BLEinit();
   #endif //PROGRAM_TRH_SENSOR
-
-  //Initialise I2C communication
-  #ifndef PROGRAM_ECG_SENSOR
-  Wire.setPins(pinSDA, pinSCL);
-  Wire.begin();
-  #endif //PROGRAM_ECG_SENSOR
-  // delay(5000);
 
   //Iniitalise PPG Sensor
   #ifdef PROGRAM_PPG_SENSOR
@@ -107,12 +92,9 @@ void setup() {
   VOCNode.BLEinit();
   #endif //PROGRAM_VOC_SENSOR
 
-  #ifdef PROGRAM_ACCEL_SENSOR
+  #ifdef PROGRAM_ACC_ECG_SENSOR
   AccelSensor.init(100, 2); //Sampler rate of 100Hz and scale of 2g
-  #endif //PROGRAM_ACCEL_SENSOR
-
-  #ifdef PROGRAM_ECG_SENSOR
-  // ECG_ACC_Node.BLEinit();
+  
   SPI.begin(ECG_SPI_SCK, ECG_SPI_MISO, ECG_SPI_MOSI, ECG_SPI_CS);
   SPI.setBitOrder(MSBFIRST);
   SPI.setDataMode(SPI_MODE1);
@@ -121,7 +103,9 @@ void setup() {
   digitalWrite(ECG_SPI_CS, HIGH);
 
   ECGSensor.init(250, 6); //Sampling Rate, Gain
-  #endif //PROGRAM_ECG_SENSOR
+  
+  ECG_ACC_Node.BLEinit();
+  #endif //PROGRAM_ACC_ECG_SENSOR
 }
 
 void loop() {
@@ -197,7 +181,7 @@ void loop() {
   #endif //PROGRAM_VOC_SENSORss
 
 // ------------ Accelerometer ------------
-  #ifdef PROGRAM_ACCEL_SENSOR
+  #ifdef PROGRAM_ACC_ECG_SENSOR
 
   double xAccel, yAccel, zAccel;
   bool movementDetected = false;
@@ -205,28 +189,16 @@ void loop() {
   AccelSensor.readAcceleration(&xAccel, &yAccel, &zAccel);
   movementDetected = AccelSensor.detectMovement(xAccel, yAccel, zAccel);
 
-  static uint32_t AccelSampleTimeStamp = millis();
+  // static uint32_t AccelSampleTimeStamp = millis();
 
-  if (millis() - AccelSampleTimeStamp >= 100)
-  {
-    AccelSampleTimeStamp = millis();
-    Serial.printf("X: %f \t Y: %f \t Z: %f \t Movement: %d\n", xAccel, yAccel, zAccel, movementDetected);
-  }
-
-  if(movementDetected)
-  {
-    char Accelmessage[32];
-    sprintf(Accelmessage, "%f", true);
-    node1BLE.BLEsendValue(Accelmessage);
-  }
-
-
-  #endif //PROGRAM_ACCEL_SENSOR
+  // if (millis() - AccelSampleTimeStamp >= 100)
+  // {
+  //   AccelSampleTimeStamp = millis();
+  //   Serial.printf("X: %f \t Y: %f \t Z: %f \t Movement: %d\n", xAccel, yAccel, zAccel, movementDetected);
+  // }
 
 
   // ------------------ ECG Sensor ------------------
-
-  #ifdef PROGRAM_ECG_SENSOR
 
   static uint32_t ECGsampleTimeStamp = millis();
 
@@ -234,18 +206,20 @@ void loop() {
   int16_t ecg_data_filtered = ECGSensor.filterECG(s32_ch1_data);
   uint8_t ecgHR = ECGSensor.readHR(ecg_data_filtered);
   
-  if(millis() - ECGsampleTimeStamp >= 1000) 
+  if((millis() - ECGsampleTimeStamp >= 1000) || movementDetected) 
   {
     ECGsampleTimeStamp = millis();
-    Serial.printf("Data: %d \t Filtered: %d \n", ecgHR, ecg_data_filtered);
+    Serial.printf("ECG_HR: %d \t Filtered: %d \n", ecgHR, ecg_data_filtered);
+    Serial.printf("X: %f \t Y: %f \t Z: %f \t Movement: %d\n", xAccel, yAccel, zAccel, movementDetected);
 
 
-    char ECGmessage[32];
-    sprintf(ECGmessage, "%d", ecgHR);
-    node1BLE.BLEsendValue(ECGmessage);
+    char ECG_ACC_message[64];
+    sprintf(ECG_ACC_message, "%d,%d,%f,%f,%f,%d", ECGsampleTimeStamp, ecgHR, xAccel, yAccel, zAccel, movementDetected);
+    ECG_ACC_Node.BLEsendValue(ECG_ACC_message);
+
   }
 
-  #endif //PROGRAM_ECG_SENSOR
+  #endif //  #ifdef PROGRAM_ECG_SENSOR
 }
 
 
