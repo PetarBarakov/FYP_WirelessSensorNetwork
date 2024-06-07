@@ -70,7 +70,7 @@ async def BLErx_temp(device, outputFile):
     
                 outputFile.write(buff)
                 outputFile.write("\n")
-                await asyncio.sleep(TH_sampling_rate)
+                # await asyncio.sleep(0.1)
 
 async def BLErx_PPG(device, outputFile):
     global HR_val, SpO2_val
@@ -88,7 +88,7 @@ async def BLErx_PPG(device, outputFile):
     
                 outputFile.write(buff)
                 outputFile.write("\n")
-                await asyncio.sleep(PPG_sampling_rate)
+                # await asyncio.sleep(0.1)
 
 
 # async def BLErx_VOC(device, outputFile):

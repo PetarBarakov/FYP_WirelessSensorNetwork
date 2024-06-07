@@ -23,10 +23,10 @@ VOCName = "FYP_VOC_Node"
 ECG_ACCName = "FYP_ECG_ACC_Node"
 
 # DeviceName = "FYP_SensorNode0"
-TH_sampling_rate = 0.15
-PPG_sampling_rate = 0.9
-VOC_sampling_rate = 0.9
-ECG_ACC_sampling_rate = 0.9
+TH_sampling_rate = 0.2
+PPG_sampling_rate = 1
+VOC_sampling_rate = 1
+ECG_ACC_sampling_rate = 1
 
 #Temperature and Humidity values
 th_timestamp = 0
@@ -41,7 +41,9 @@ SpO2_val = 0
 #VOC values
 VOC_timestamp = 0
 VOC_val = 0
-NO2_val = 0
+NOX_val = 0
+VOC_jump = 0
+NOX_jump = 0
 
 #ECG and Accelerometer values
 ECG_ACC_timestamp = 0
@@ -49,20 +51,20 @@ ECG_heart_rate = 0
 X_acc = 0
 Y_acc = 0
 Z_acc = 0
-Movment = False
+Movement = False
 
 async def BLEconnect(device_name):
     print(f"Scanning for {device_name}... (timeout after 10s)")
     device = await BleakScanner.find_device_by_name(device_name, timeout=10.0)
 
     if device:
-        print("DEVCIE FOUND.....")
+        print("DEVICE FOUND.....")
     else:
         print("DEVICE NOT FOUND.....")
     return device
 
-async def BLErx_temp(device, outputFile):
-    global Humid, Temp
+async def BLErx_temp(device):
+    global th_timestamp, Humid, Temp
     if device:
         async with BleakClient(device) as client:
             while True:
@@ -75,13 +77,11 @@ async def BLErx_temp(device, outputFile):
                 Humid = float(buff.split(",")[2])
 
                 print(f"Timestamp: {th_timestamp} \t Temperature: {Temp} \t Humidity: {Humid}")
-    
-                # outputFile.write(buff)
-                # outputFile.write("\n")
-                await asyncio.sleep(TH_sampling_rate)
 
-async def BLErx_PPG(device, outputFile):
-    global HR_val, SpO2_val
+                await asyncio.sleep(TH_sampling_rate/2)
+
+async def BLErx_PPG(device):
+    global PPG_timestamp, HR_val, SpO2_val
     if device:
         async with BleakClient(device) as client:
             while True:
@@ -95,27 +95,47 @@ async def BLErx_PPG(device, outputFile):
 
                 print(f"Timestamp: {PPG_timestamp} \t HR: {HR_val} \t SpO2: {SpO2_val}")
 
-                await asyncio.sleep(PPG_sampling_rate)
+                await asyncio.sleep(PPG_sampling_rate/2)
 
 
-# async def BLErx_VOC(device, outputFile):
-#     global VOC_val, NO2_val
-#     if device:
-#         async with BleakClient(device) as client:
-#             while True:
+async def BLErx_VOC(device):
+    global VOC_timestamp, VOC_val, NOX_val, VOC_jump, NOX_jump
+    if device:
+        async with BleakClient(device) as client:
+            while True:
             
-#                 buff = await client.read_gatt_char(VOC_UUID)
-#                 buff = buff.decode("utf-8")
+                buff = await client.read_gatt_char(VOC_UUID)
+                buff = buff.decode("utf-8")
 
-#                 VOC_val = float(buff.split(",")[0])
-#                 NO2_val = float(buff.split(",")[1])
+                VOC_timestamp = float(buff.split(",")[0])
+                VOC_val = float(buff.split(",")[1])
+                NOX_val = float(buff.split(",")[2])
+                VOC_jump = float(buff.split(",")[3])
+                NOX_jump = float(buff.split(",")[4])
 
-#                 print(f"VOC: {VOC_val} \t NO2: {NO2_val}")
-    
-#                 outputFile.write(buff)
-#                 outputFile.write("\n")
-#                 await asyncio.sleep(VOC_sampling_rate)
+                print(f"Timestamp: {VOC_timestamp} \t VOC: {VOC_val} \t NO2: {NOX_val} \t VOC Jump: {VOC_jump} \t NO2 Jump: {NOX_jump}")
 
+                await asyncio.sleep(VOC_sampling_rate/2)
+
+async def BLErx_ECG_ACC(device):
+    global ECG_ACC_timestamp, ECG_heart_rate, X_acc, Y_acc, Z_acc, Movement
+    if device:
+        async with BleakClient(device) as client:
+            while True:
+            
+                buff = await client.read_gatt_char(ECG_ACC_UUID)
+                buff = buff.decode("utf-8")
+
+                ECG_ACC_timestamp = float(buff.split(",")[0])
+                ECG_heart_rate = float(buff.split(",")[1])
+                X_acc = float(buff.split(",")[2])
+                Y_acc = float(buff.split(",")[3])
+                Z_acc = float(buff.split(",")[4])
+                Movement = float(buff.split(",")[5])
+
+                print(f"Timestamp: {ECG_ACC_timestamp} \t ECG_HR: {ECG_heart_rate} \t X_acc: {X_acc} \t Y_acc: {Y_acc} \t Z_acc: {Z_acc} \t Mov: {Movement}")
+
+                await asyncio.sleep(ECG_ACC_sampling_rate/2)
 
 
 
@@ -219,45 +239,72 @@ async def BLErx_PPG(device, outputFile):
 #     plot_thread = threading.Thread(target=plot)
 #     plot_thread.start()
 
-async def async_main_th(device, outputFile):
-    await asyncio.gather(BLErx_temp(device, outputFile))
+def record_and_plot():
 
-async def async_main_ppg(device, outputFile):
-    await asyncio.gather(BLErx_PPG(device, outputFile))
+    data_file = open("Data/multinodal_readout.csv", "w")
+
+    data_file.write("TH Timstamp, Temperature, Humidity,,")
+    data_file.write("PPG Timestamp, HR, SpO2,,")
+    data_file.write("VOC Timestamp, VOC, NOX, VOC_jump, NOX_jump,,")
+    data_file.write("ECG_ACC Timestamp, HR, X_acc, Y_acc, Z_acc, Movement\n")
+
+    while True:
+        # print("KUREC\n")
+
+        data_file.write(f"{th_timestamp}, {Temp}, {Humid},,")
+        data_file.write(f"{PPG_timestamp}, {HR_val}, {SpO2_val},,")
+        data_file.write(f"{VOC_timestamp}, {VOC_val}, {NOX_val}, {VOC_jump}, {NOX_jump},,")
+        data_file.write(f"{ECG_ACC_timestamp}, {ECG_heart_rate}, {X_acc}, {Y_acc}, {Z_acc}, {Movement}\n")
+
+        sleep(min(TH_sampling_rate, PPG_sampling_rate, VOC_sampling_rate, ECG_ACC_sampling_rate))
+
+    data_file.close()
+
+async def async_main_th(device):
+    await asyncio.gather(BLErx_temp(device))
+
+async def async_main_ppg(device):
+    await asyncio.gather(BLErx_PPG(device))
+
+async def async_main_voc(device):
+    await asyncio.gather(BLErx_VOC(device))
+
+async def async_main_ecg_acc(device):
+    await asyncio.gather(BLErx_ECG_ACC(device))
 
 
-def async_entry_th(device, outputFile):
-    asyncio.run(async_main_th(device, outputFile))
+def async_entry_th(device):
+    asyncio.run(async_main_th(device))
 
-def async_entry_ppg(device, outputFile):
-    asyncio.run(async_main_ppg(device, outputFile))
+def async_entry_ppg(device):
+    asyncio.run(async_main_ppg(device))
 
+def async_entry_voc(device):
+    asyncio.run(async_main_voc(device))
 
-def init_ble_threads(devices, outputFile):
-    th_thread = threading.Thread(target=async_entry_th, args=(devices[0], outputFile,))
-    ppg_thread = threading.Thread(target=async_entry_ppg, args=(devices[1], outputFile,))
+def async_entry_ecg_acc(device):
+    asyncio.run(async_main_ecg_acc(device))
+
+def init_ble_threads(devices):
+    th_thread = threading.Thread(target=async_entry_th, args=(devices[0],))
+    ppg_thread = threading.Thread(target=async_entry_ppg, args=(devices[1],))
+    voc_thread = threading.Thread(target=async_entry_voc, args=(devices[2],))
+    ecg_acc_thread = threading.Thread(target=async_entry_ecg_acc, args=(devices[3],))
+
     ppg_thread.start()
     th_thread.start()
-
+    voc_thread.start()
+    ecg_acc_thread.start()
 
 
 if __name__ == "__main__":
     # start_ploting()
-
     th_device  = asyncio.run(BLEconnect(THName))
     ppg_device = asyncio.run(BLEconnect(PPGName))
+    voc_device = asyncio.run(BLEconnect(VOCName))
+    ecg_acc_device = asyncio.run(BLEconnect(ECG_ACCName))
 
-    data_file = open("Data/multinodal_readout.csv", "w")
-    data_file.write("TH Timstamp, Temperature, Humidity,, PPG Timestamp, PPG HR, Sp02\n")
+    init_ble_threads(devices=[th_device, ppg_device, voc_device, ecg_acc_device])
 
-    init_ble_threads(devices=[th_device, ppg_device], outputFile=data_file)
+    record_and_plot()
     # plot()
-
-    data_file.close()
-
-
-
-
-
-
-
