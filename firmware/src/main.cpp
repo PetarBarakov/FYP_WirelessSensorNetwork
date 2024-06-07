@@ -7,8 +7,8 @@
 
 #ifdef ESP32_SENSORS_MEASUREMENT
 
-#define PROGRAM_TRH_SENSOR
-// #define PROGRAM_PPG_SENSOR
+// #define PROGRAM_TRH_SENSOR
+#define PROGRAM_PPG_SENSOR
 // #define PROGRAM_VOC_SENSOR
 // #define PROGRAM_ACCEL_SENSOR
 // #define PROGRAM_ECG_SENSOR
@@ -38,24 +38,27 @@
 #define VOC_UUID "8c367fd0-fd14-49a8-bf73-d5dfa76f6e1a"
 #define ECG_ACC_UUID "b37a5a9f-97ac-4f36-9f1f-024c0a3e896d"
 
+#define TH_SERVICE "e76df599-c633-455e-8c90-fab57811c73c"
+#define PPG_SERVICE "781bb971-f4b1-46d9-a923-4bba480f5f11"
+#define VOC_SERVICE "a4fce472-2bfa-48a5-bd49-32dde7ad80ab"
+#define ECG_ACC_SERVICE "d9395096-8d5b-4a28-8474-d615bb170069"
 
-publisherBLE THNode("FYP_TH_Node", TH_UUID);
-// publisherBLE PPGNode("FYP_PPG_Node", PPG_UUID);
-// publisherBLE VOCNode("FYP_VOC_Node", VOC_UUID);
-// publisherBLE ECG_ACC_Node("FYP_ECG_ACC_Node", ECG_ACC_UUID);
 
 // //Initialise an object for the PPG sensor
 #ifdef PROGRAM_PPG_SENSOR
 MAX30102 PPGSensor(MAX30102_ADDRESS);
+publisherBLE PPGNode("FYP_PPG_Node", PPG_UUID, PPG_SERVICE);
 #endif //PROGRAM_PPG_SENSOR
 
 // //Initialise an object for the VOC sensor
 #ifdef PROGRAM_VOC_SENSOR
 SGP41 VOCSensor(SGP41_ADDRESS);
+publisherBLE VOCNode("FYP_VOC_Node", VOC_UUID, VOC_SERVICE);
 #endif //PROGRAM_VOC_SENSOR
 
 #ifdef PROGRAM_TRH_SENSOR
 SHT40 TRHSensor(SHT40_ADDRESS);
+publisherBLE THNode("FYP_TH_Node", TH_UUID, TH_SERVICE);
 #endif //PROGRAM_TRH_SENSOR
 
 //Initialise Acclelerometer
@@ -66,16 +69,16 @@ LIS2DE12 AccelSensor(LIS2DE12_ADDRESS);
 //Initialise ECG Sensor
 #ifdef PROGRAM_ECG_SENSOR
 ADS1292 ECGSensor(ECG_SPI_CS);
+publisherBLE ECG_ACC_Node("FYP_ECG_ACC_Node", ECG_ACC_UUID, ECG_ACC_SERVICE);
 #endif //PROGRAM_ECG_SENSOR
 
 void setup() {
   //Initialise Serial 
   Serial.begin(115200);
   //Initialise the BLE communication
+  #ifdef PROGRAM_TRH_SENSOR
   THNode.BLEinit();
-  // PPGNode.BLEinit();
-  // VOCNode.BLEinit();
-  // ECG_ACC_Node.BLEinit();
+  #endif //PROGRAM_TRH_SENSOR
 
   //Initialise I2C communication
   #ifndef PROGRAM_ECG_SENSOR
@@ -94,12 +97,14 @@ void setup() {
                   (uint8_t) 18                //SpO2PulseWidth
                 );  
 
+  PPGNode.BLEinit();
   #endif //PROGRAM_PPG_SENSOR
 
   #ifdef PROGRAM_VOC_SENSOR
   uint16_t SRAW_VOC_INTIAL = 0;
   VOCSensor.executeConditioning(SRAW_VOC_INTIAL);
-  Serial.printf("Initial SRAW VOC: %d\n", SRAW_VOC_INTIAL);
+  // Serial.printf("Initial SRAW VOC: %d\n", SRAW_VOC_INTIAL);
+  VOCNode.BLEinit();
   #endif //PROGRAM_VOC_SENSOR
 
   #ifdef PROGRAM_ACCEL_SENSOR
@@ -107,6 +112,7 @@ void setup() {
   #endif //PROGRAM_ACCEL_SENSOR
 
   #ifdef PROGRAM_ECG_SENSOR
+  // ECG_ACC_Node.BLEinit();
   SPI.begin(ECG_SPI_SCK, ECG_SPI_MISO, ECG_SPI_MOSI, ECG_SPI_CS);
   SPI.setBitOrder(MSBFIRST);
   SPI.setDataMode(SPI_MODE1);
@@ -148,22 +154,21 @@ void loop() {
   #ifdef PROGRAM_PPG_SENSOR
 
   int32_t HR = 0, SpO2 = 0;
-  static uint32_t PPGstartSampleTime = millis();
+  static uint32_t PPGSampleTime = millis();
 
   //Start sampling
   PPGSensor.SpO2andHRread(&HR, &SpO2);
-  uint32_t PPGsampleTimeStamp = millis();
 
-  if(PPGsampleTimeStamp - PPGstartSampleTime >= 1000)
+  if(millis() - PPGSampleTime >= 1000)
   {
     Serial.printf("Heart Rate: %d \t Sp02: %d\n", HR, SpO2);
     
     //Transmit PPG data
     char PPGmessage[32];
-    sprintf(PPGmessage, "%d,%d", HR, SpO2);
+    sprintf(PPGmessage, "%d,%d,%d", PPGSampleTime, HR, SpO2);
     PPGNode.BLEsendValue(PPGmessage);
     
-    PPGstartSampleTime = PPGsampleTimeStamp;
+    PPGSampleTime = millis();
   }
 
   #endif //PROGRAM_PPG_SENSOR

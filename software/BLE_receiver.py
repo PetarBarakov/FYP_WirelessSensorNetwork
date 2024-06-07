@@ -91,40 +91,22 @@ async def BLErx_PPG(device, outputFile):
                 await asyncio.sleep(PPG_sampling_rate)
 
 
-async def BLErx_VOC(device, outputFile):
-    global VOC_val, NO2_val
-    if device:
-        async with BleakClient(device) as client:
-            while True:
+# async def BLErx_VOC(device, outputFile):
+#     global VOC_val, NO2_val
+#     if device:
+#         async with BleakClient(device) as client:
+#             while True:
             
-                buff = await client.read_gatt_char(VOC_UUID)
-                buff = buff.decode("utf-8")
+#                 buff = await client.read_gatt_char(VOC_UUID)
+#                 buff = buff.decode("utf-8")
 
-                VOC_val = float(buff.split(",")[0])
-                NO2_val = float(buff.split(",")[1])
+#                 VOC_val = float(buff.split(",")[0])
+#                 NO2_val = float(buff.split(",")[1])
 
-                print(f"VOC: {VOC_val} \t NO2: {NO2_val}")
+#                 print(f"VOC: {VOC_val} \t NO2: {NO2_val}")
     
-                outputFile.write(buff)
-                outputFile.write("\n")
-                await asyncio.sleep(VOC_sampling_rate)
+#                 outputFile.write(buff)
+#                 outputFile.write("\n")
+#                 await asyncio.sleep(VOC_sampling_rate)
 
 
-
-
-# async def async_main(device, outputFile):
-    
-#     await asyncio.gather(BLErx(device, outputFile), plot())
-
-
-    
-
-# if __name__ == "__main__":
-#     DeviceDetected = asyncio.run(BLEconnect())
-
-#     data_file = open("Data/output.csv", "w")
-#     data_file.write("Temperature, Humidity\n")
-
-#     asyncio.run(async_main(device=DeviceDetected, outputFile=data_file))
-
-#     data_file.close()

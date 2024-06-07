@@ -9,10 +9,11 @@ void MyServerCallbacks::onDisconnect(BLEServer* pServer) {
 }
 
 
-publisherBLE::publisherBLE(char* setupName, char* charUUID)
+publisherBLE::publisherBLE(char* setupName, char* charUUID, char* serviceUUID)
 {
     BLEname = setupName;
-    UUID = charUUID;
+    char_UUID = charUUID;
+    service_UUID = serviceUUID;
 }
    
 void publisherBLE::BLEinit()
@@ -26,11 +27,11 @@ void publisherBLE::BLEinit()
     pServer->setCallbacks(Callbacks_handle);
 
     // Create the BLE Service
-    BLEService *pService = pServer->createService(SERVICE_UUID);
+    BLEService *pService = pServer->createService(service_UUID);
 
     // Create a BLE Characteristic
     pCharacteristic = pService->createCharacteristic(
-                        UUID,
+                        char_UUID,
                         BLECharacteristic::PROPERTY_NOTIFY
     );
 
