@@ -76,7 +76,7 @@ async def BLErx_temp(device):
 
                 print(f"Timestamp: {th_timestamp} \t Temperature: {Temp} \t Humidity: {Humid}")
 
-                # await asyncio.sleep(TH_sampling_rate/2)
+                await asyncio.sleep(TH_sampling_rate/2)
 
 async def BLErx_PPG(device):
     global PPG_timestamp, HR_val, SpO2_val
@@ -174,32 +174,63 @@ def init_ble_threads(devices):
     ecg_acc_thread.start()
 
 
-
+# =========================================================================
+# =========================================================================
+# =========================================================================
+# =========================================================================
 # ==================== Data Ploting and Data recording ====================
 
 # General Values
-x_num_of_seconds = 15
+x_num_of_seconds = 45
 temp_x_num_of_samples = round(x_num_of_seconds / TH_sampling_rate)
+ppg_x_num_of_samples = round(x_num_of_seconds / PPG_sampling_rate)
+ecg_acc_x_num_of_samples = round(x_num_of_seconds / ECG_ACC_sampling_rate)
+voc_x_num_of_samples = round(x_num_of_seconds / VOC_sampling_rate)
+
 
 #Temperature and Humidity values
 tempSamples = [0]*temp_x_num_of_samples
 humidSamples = [0]*temp_x_num_of_samples
-# tempTimeSamples = list(range(0, x_num_of_seconds, TH_sampling_rate))
 tempTimeSamples = [0]*temp_x_num_of_samples
 
 #PPG and ECG values
-
-ppg_x_num_of_samples = round(x_num_of_seconds / PPG_sampling_rate)
 ppgHrSamples = [0]*ppg_x_num_of_samples
+ppgSpO2Samples = [0]*ppg_x_num_of_samples
+ppgTimeSamples = [0]*ppg_x_num_of_samples
+ecgHrSamples = [0]*ecg_acc_x_num_of_samples
+ecgAccTimeSamples = [0]*ecg_acc_x_num_of_samples
+
+#VOC values
+vocSamples = [0]*voc_x_num_of_samples
+noxSamples = [0]*voc_x_num_of_samples
+vocTimeSamples = [0]*voc_x_num_of_samples
+
+#Jump values
+vocJumpSamples = [0]*voc_x_num_of_samples
+noxJumpSamples = [0]*voc_x_num_of_samples
+movJumpSamples = [0]*ecg_acc_x_num_of_samples
 
 
 
 # This function is called periodically from FuncAnimation
-def animate(i,data_file, Temp_Line, Humid_Line, temp_ax, humid_ax):
+def animate(i,data_file,
+                Temp_Line,Humid_Line, temp_ax, humid_ax,
+                PPG_HR_Line, SpO2_Line, ECG_HR_Line, hr_ax, spo2_ax,
+                VOC_Line, NOX_Line, voc_ax, nox_ax,
+                VOC_jump_Line, NOX_jump_Line, mov_jump_Line, jump_ax,
+            ):
 
     global tempSamples, humidSamples, tempTimeSamples
+    global th_timestamp, Temp, Humid
 
-    # Add y to list
+    global ppgHrSamples, ppgSpO2Samples, ppgTimeSamples, ecgHrSamples, ecgAccTimeSamples
+    global PPG_timestamp, HR_val, SpO2_val
+
+    global vocSamples, noxSamples, vocTimeSamples, vocJumpSamples, noxJumpSamples, movJumpSamples
+    global VOC_timestamp, VOC_val, NOX_val, VOC_jump, NOX_jump, ECG_ACC_timestamp, ECG_heart_rate, X_acc, Y_acc, Z_acc, Movement
+
+    #===========================================
+    #+++++++++++++++ [0x0] +++++++++++++++++++++
     tempSamples.append(Temp)
     humidSamples.append(Humid)
     tempTimeSamples.append(th_timestamp/1000) #shows in seconds
@@ -212,16 +243,89 @@ def animate(i,data_file, Temp_Line, Humid_Line, temp_ax, humid_ax):
     # Update line with new Y values
     Temp_Line.set_ydata(tempSamples)
     Temp_Line.set_xdata(tempTimeSamples)
-    
     Humid_Line.set_ydata(humidSamples)
     Humid_Line.set_xdata(tempTimeSamples)
 
-
     temp_ax.set_xlim (min(tempTimeSamples) - 0.01, max(tempTimeSamples) + 0.01)
     humid_ax.set_xlim(min(tempTimeSamples) - 0.01, max(tempTimeSamples) + 0.01)
-    
     temp_ax.set_ylim (min(tempSamples)  - 2, max(tempSamples)  + 2)
     humid_ax.set_ylim(min(humidSamples) - 3, max(humidSamples) + 2)
+
+
+
+    #===========================================
+    #+++++++++++++++ [1x0] +++++++++++++++++++++
+    ppgHrSamples.append(HR_val)
+    ppgSpO2Samples.append(SpO2_val)
+    ppgTimeSamples.append(PPG_timestamp/1000) #shows in seconds
+    ecgHrSamples.append(ECG_heart_rate)
+    ecgAccTimeSamples.append(ECG_ACC_timestamp/1000) #shows in seconds
+
+    # Limit y list to set number of items
+    ppgHrSamples = ppgHrSamples[-ppg_x_num_of_samples:]
+    ppgSpO2Samples = ppgSpO2Samples[-ppg_x_num_of_samples:]
+    ppgTimeSamples = ppgTimeSamples[-ppg_x_num_of_samples:]
+    ecgHrSamples = ecgHrSamples[-ecg_acc_x_num_of_samples:]
+    ecgAccTimeSamples = ecgAccTimeSamples[-ecg_acc_x_num_of_samples:]
+
+    # Update line with new Y values
+    PPG_HR_Line.set_ydata(ppgHrSamples)
+    PPG_HR_Line.set_xdata(ppgTimeSamples)
+    SpO2_Line.set_ydata(ppgSpO2Samples)
+    SpO2_Line.set_xdata(ppgTimeSamples)
+    ECG_HR_Line.set_ydata(ecgHrSamples)
+    ECG_HR_Line.set_xdata(ecgAccTimeSamples)
+
+    hr_ax.set_xlim (min(ppgTimeSamples) - 0.01, max(ppgTimeSamples) + 0.01)
+    spo2_ax.set_xlim(min(ppgTimeSamples) - 0.01, max(ppgTimeSamples) + 0.01)
+    hr_ax.set_ylim (0, 150)
+    spo2_ax.set_ylim(20, 110)
+
+
+    #===========================================
+    #+++++++++++++++ [0x1] +++++++++++++++++++++
+
+    vocSamples.append(VOC_val)
+    noxSamples.append(NOX_val)
+    vocTimeSamples.append(VOC_timestamp/1000) #shows in seconds
+
+    vocSamples = vocSamples[-voc_x_num_of_samples:]
+    noxSamples = noxSamples[-voc_x_num_of_samples:]
+    vocTimeSamples = vocTimeSamples[-voc_x_num_of_samples:]
+
+    VOC_Line.set_ydata(vocSamples)
+    VOC_Line.set_xdata(vocTimeSamples)
+    NOX_Line.set_ydata(noxSamples)
+    NOX_Line.set_xdata(vocTimeSamples)
+
+    voc_ax.set_xlim (min(vocTimeSamples) - 0.01, max(vocTimeSamples) + 0.01)
+    nox_ax.set_xlim(min(vocTimeSamples) - 0.01, max(vocTimeSamples) + 0.01)
+    voc_ax.set_ylim (min(vocSamples) - 200, max(vocSamples) + 200)
+    nox_ax.set_ylim(min(noxSamples) - 300, max(noxSamples) + 200)
+
+
+    #===========================================
+    #+++++++++++++++ [1x1] +++++++++++++++++++++
+    vocJumpSamples.append(VOC_jump)
+    noxJumpSamples.append(NOX_jump)
+    movJumpSamples.append(Movement)
+
+    vocJumpSamples = vocJumpSamples[-voc_x_num_of_samples:]
+    noxJumpSamples = noxJumpSamples[-voc_x_num_of_samples:]
+    movJumpSamples = movJumpSamples[-ecg_acc_x_num_of_samples:]
+
+    VOC_jump_Line.set_ydata(vocJumpSamples)
+    VOC_jump_Line.set_xdata(vocTimeSamples)
+    NOX_jump_Line.set_ydata(noxJumpSamples)
+    NOX_jump_Line.set_xdata(vocTimeSamples)
+    mov_jump_Line.set_ydata(movJumpSamples)
+    mov_jump_Line.set_xdata(ecgAccTimeSamples)
+
+    jump_ax.set_xlim (min(vocTimeSamples) - 0.01, max(vocTimeSamples) + 0.01)
+    jump_ax.set_ylim (-1, 2)
+
+    #===========================================
+    #===========================================
 
 
     data_file.write(f"{th_timestamp}, {Temp}, {Humid},,")
@@ -229,7 +333,7 @@ def animate(i,data_file, Temp_Line, Humid_Line, temp_ax, humid_ax):
     data_file.write(f"{VOC_timestamp}, {VOC_val}, {NOX_val}, {VOC_jump}, {NOX_jump},,")
     data_file.write(f"{ECG_ACC_timestamp}, {ECG_heart_rate}, {X_acc}, {Y_acc}, {Z_acc}, {Movement}\n")
 
-    return Temp_Line, Humid_Line
+    return Temp_Line, Humid_Line, PPG_HR_Line, SpO2_Line, ECG_HR_Line, VOC_Line, NOX_Line, VOC_jump_Line, mov_jump_Line
 
 def record_and_plot ():
 
@@ -255,25 +359,76 @@ def record_and_plot ():
     temp_ax.set_ylabel("Temperature (C)")
     humid_ax.set_ylabel("Humidity (%)")
 
+    plt.legend([Temp_Line, Humid_Line], ['Temperature', 'Humidity'])
+
+    # ---- HR and SpO2 ----
+    PPG_HR_Line, = hr_ax.plot(ppgTimeSamples, ppgHrSamples, color='blue', label="PPG HR")
+    spo2_ax = hr_ax.twinx()
+    SpO2_Line, = spo2_ax.plot(ppgTimeSamples, ppgSpO2Samples, color='red', label="SpO2")
+    ECG_HR_Line, = hr_ax.plot(ecgAccTimeSamples, ecgHrSamples, color='green', label="ECG HR")
+
+    hr_ax.set_title("Hear Rate and Oxygen Level (SpO2)")
+    hr_ax.set_xlabel("Time (s)")
+    hr_ax.set_ylabel("Heart Rate (bpm)")
+    spo2_ax.set_ylabel("Oxygen Level (%)")
+    plt.legend([PPG_HR_Line, SpO2_Line, ECG_HR_Line], ['PPG HR', 'SpO2', 'ECG HR'])
+
+    # ---- VOC and NOX ----
+    VOC_Line, = voc_ax.plot(vocTimeSamples, vocSamples, color='blue', label="VOC")
+    nox_ax = voc_ax.twinx()
+    NOX_Line, = nox_ax.plot(vocTimeSamples, noxSamples, color='red', label="NOX")
+
+    voc_ax.set_title("VOC and NOX Raw Levels")
+    voc_ax.set_xlabel("Time (s)")
+    voc_ax.set_ylabel("VOC (raw)")
+    nox_ax.set_ylabel("NOX (raw)")
+
+    plt.legend([VOC_Line, NOX_Line], ['VOC', 'NOX'])
+
+    # ---- VOC and NOX Jumps ----
+    VOC_jump_Line, = jump_ax.plot(vocTimeSamples, vocJumpSamples, color='blue', label="VOC Jump")
+    NOX_jump_Line, = jump_ax.plot(vocTimeSamples, noxJumpSamples, color='red', label="NOX Jump")
+    mov_jump_Line, = jump_ax.plot(ecgAccTimeSamples, movJumpSamples, color='green', label="Movement")
+
+    jump_ax.set_title("VOC and NOX Jumps and Detected Movement")
+    jump_ax.set_xlabel("Time (s)")
+    jump_ax.set_ylabel("Jump (True/False)")
+
+    plt.legend([VOC_jump_Line, NOX_jump_Line, mov_jump_Line], ['VOC Jump', 'NOX Jump', 'Movement'])
+
+
     ani = animation.FuncAnimation(fig,
         animate,
-        fargs=(data_file, Temp_Line, Humid_Line, temp_ax, humid_ax),
+        fargs=(data_file, Temp_Line, Humid_Line, temp_ax, humid_ax,
+                PPG_HR_Line, SpO2_Line, ECG_HR_Line, hr_ax, spo2_ax,
+                VOC_Line, NOX_Line, voc_ax, nox_ax,
+                VOC_jump_Line, NOX_jump_Line, mov_jump_Line, jump_ax,
+               ),
         interval=200,
         blit=False)
     plt.show()
 
     # data_file.close()
 
+
+
+# =========================================================================
+# =========================================================================
+# =========================================================================
+# =========================================================================
+
+
+
 if __name__ == "__main__":
     # start_ploting()
-    th_device  = asyncio.run(BLEconnect(THName))
-    ppg_device = asyncio.run(BLEconnect(PPGName))
-    voc_device = asyncio.run(BLEconnect(VOCName))
+    # th_device  = asyncio.run(BLEconnect(THName))
+    # ppg_device = asyncio.run(BLEconnect(PPGName))
+    # voc_device = asyncio.run(BLEconnect(VOCName))
     ecg_acc_device = asyncio.run(BLEconnect(ECG_ACCName))
 
-    init_ble_threads(devices=[th_device, ppg_device, voc_device, ecg_acc_device])
-    # th_thread = threading.Thread(target=async_entry_th, args=(th_device,))
-    # th_thread.start()
+    # init_ble_threads(devices=[th_device, ppg_device, voc_device, ecg_acc_device])
+    test_thread = threading.Thread(target=async_entry_ecg_acc, args=(ecg_acc_device,))
+    test_thread.start()
 
     record_and_plot()
     
