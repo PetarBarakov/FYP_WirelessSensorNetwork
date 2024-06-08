@@ -110,10 +110,15 @@ void LIS2DE12::setFIFO()
 void LIS2DE12::init(uint16_t sampleRate, uint8_t inputScale)
 {
     reset();
+    delay(5);
     setSampleRate(sampleRate);
+    delay(5);
     setScale(inputScale);
+    delay(5);
     setFIFO();
+    delay(5);
     setFIFOMode(FIFO_STREAM_MODE);
+    delay(5);
 }
 
 void LIS2DE12::setFIFOMode(uint8_t mode)

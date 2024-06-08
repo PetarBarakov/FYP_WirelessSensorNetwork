@@ -93,7 +93,6 @@ void setup() {
   #endif //PROGRAM_VOC_SENSOR
 
   #ifdef PROGRAM_ACC_ECG_SENSOR
-  AccelSensor.init(100, 2); //Sampler rate of 100Hz and scale of 2g
   
   SPI.begin(ECG_SPI_SCK, ECG_SPI_MISO, ECG_SPI_MOSI, ECG_SPI_CS);
   SPI.setBitOrder(MSBFIRST);
@@ -105,6 +104,10 @@ void setup() {
   ECGSensor.init(250, 6); //Sampling Rate, Gain
   
   ECG_ACC_Node.BLEinit();
+
+  AccelSensor.init(100, 2); //Sampler rate of 100Hz and scale of 2g
+
+
   #endif //PROGRAM_ACC_ECG_SENSOR
 }
 
@@ -183,13 +186,13 @@ void loop() {
 // ------------ Accelerometer ------------
   #ifdef PROGRAM_ACC_ECG_SENSOR
 
-  double xAccel, yAccel, zAccel;
+  double xAccel = 0, yAccel = 0, zAccel= 0;
   bool movementDetected = false;
 
   AccelSensor.readAcceleration(&xAccel, &yAccel, &zAccel);
   movementDetected = AccelSensor.detectMovement(xAccel, yAccel, zAccel);
 
-  // static uint32_t AccelSampleTimeStamp = millis();
+  static uint32_t AccelSampleTimeStamp = millis();
 
   // if (millis() - AccelSampleTimeStamp >= 100)
   // {
