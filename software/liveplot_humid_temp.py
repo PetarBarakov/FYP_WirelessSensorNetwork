@@ -97,7 +97,7 @@ def plot ():
     ani = animation.FuncAnimation(fig,
         animate,
         fargs=(tempSamples, humidSamples, timeLen, tempLine, humidLine, tempRange, humidRange, tempax, humidax),
-        interval=BLE_receiver.samplingRate*1000,
+        interval=0.2,
         blit=True)
     plt.show()
 

@@ -8,9 +8,7 @@ from time import sleep
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-import BLE_receiver
-
-
+# ==================== BLE Setup ====================
 
 TH_UUID      = "e87917aa-103e-4d61-a11d-ae0d09963b64"
 PPG_UUID     = "4703e542-0870-4fd7-8685-0dc1b371d700"
@@ -78,7 +76,7 @@ async def BLErx_temp(device):
 
                 print(f"Timestamp: {th_timestamp} \t Temperature: {Temp} \t Humidity: {Humid}")
 
-                await asyncio.sleep(TH_sampling_rate/2)
+                # await asyncio.sleep(TH_sampling_rate/2)
 
 async def BLErx_PPG(device):
     global PPG_timestamp, HR_val, SpO2_val
@@ -139,127 +137,6 @@ async def BLErx_ECG_ACC(device):
 
 
 
-
-# This function is called periodically from FuncAnimation
-# def animate(i, tempSamples, humidSamples, timeLen, tempLine, humidLine, tempRange, humidRange, tempax, humidax):
-
-#     temp_c = BLE_receiver.Temp
-#     humid = BLE_receiver.Humid
-#     # Add y to list
-#     tempSamples.append(temp_c)
-#     humidSamples.append(humid)
-
-#     # Limit y list to set number of items
-#     tempSamples = tempSamples[-timeLen:]
-#     humidSamples = humidSamples[-timeLen:]
-
-#     # Update line with new Y values
-#     tempLine.set_ydata(tempSamples)
-#     humidLine.set_ydata(humidSamples)
-
-
-#     # Autoscale Y-axis
-#     if(temp_c != 0 and humid != 0):
-#         if(temp_c > tempRange[1]):
-#             tempRange[1] = temp_c + 1
-#             tempax.set_ylim(tempRange)
-
-#         if(temp_c < tempRange[0]):
-#             tempRange[0] = temp_c - 1
-#             tempax.set_ylim(tempRange)
-
-#         if(temp_c < tempRange[1] - 5):
-#             tempRange[1] -= 1
-#             tempax.set_ylim(tempRange)
-
-#         if(temp_c > tempRange[0] + 5):
-#             tempRange[0] += 1
-#             tempax.set_ylim(tempRange)
-
-
-
-#         if(humid > humidRange[1]):
-#             humidRange[1] = humid + 1
-#             humidax.set_ylim(humidRange)
-            
-
-#         if(humid < humidRange[0]):
-#             humidRange[0] = humid - 1
-#             humidax.set_ylim(humidRange)
-
-#         if(humid < humidRange[1] - 5):
-#             humidRange[1] -= 1
-#             humidax.set_ylim(humidRange)
-
-#         if(humid > humidRange[0] + 5):
-#             humidRange[0] += 1
-#             humidax.set_ylim(humidRange)
-
-
-#     return tempLine, humidLine, 
-
-# def plot ():
-
-#     # Parameters
-#     timeLen = 600         # Number of points to display
-#     tempRange = [24, 26]  # Range of possible Y values to display
-#     humidRange = [44, 46]  # Range of possible Y values to display
-
-#     # Create figure for plotting
-#     fig = plt.figure()
-#     tempax = fig.add_subplot(1, 1, 1)
-#     humidax = tempax.twinx()
-#     timeSamples = list(range(0, timeLen))
-#     tempSamples = [0] * timeLen
-#     humidSamples = [0] * timeLen
-#     tempax.set_ylim(tempRange)
-#     humidax.set_ylim(humidRange)
-
-#     # Create a blank line. We will update the line in animate
-#     tempLine, = tempax.plot(timeSamples, tempSamples, color='blue')
-#     humidLine, = humidax.plot(timeSamples, humidSamples, color = 'red')
-
-#     # Add labels
-#     plt.title('Temperature and Hunidity')
-#     plt.xlabel('Samples')
-#     tempax.set_ylabel('Temperature (deg C)')
-#     humidax.set_ylabel('Humidity (%)')
-
-#     plt.legend([tempLine, humidLine], ['Temperature', 'Humidity'])
-
-#     # Set up plot to call animate() function periodically
-#     ani = animation.FuncAnimation(fig,
-#         animate,
-#         fargs=(tempSamples, humidSamples, timeLen, tempLine, humidLine, tempRange, humidRange, tempax, humidax),
-#         interval=BLE_receiver.samplingRate*1000,
-#         blit=True)
-#     plt.show()
-
-# def start_ploting():
-#     plot_thread = threading.Thread(target=plot)
-#     plot_thread.start()
-
-def record_and_plot():
-
-    data_file = open("Data/multinodal_readout.csv", "w")
-
-    data_file.write("TH Timstamp, Temperature, Humidity,,")
-    data_file.write("PPG Timestamp, HR, SpO2,,")
-    data_file.write("VOC Timestamp, VOC, NOX, VOC_jump, NOX_jump,,")
-    data_file.write("ECG_ACC Timestamp, HR, X_acc, Y_acc, Z_acc, Movement\n")
-
-    while True:
-        # print("KUREC\n")
-
-        data_file.write(f"{th_timestamp}, {Temp}, {Humid},,")
-        data_file.write(f"{PPG_timestamp}, {HR_val}, {SpO2_val},,")
-        data_file.write(f"{VOC_timestamp}, {VOC_val}, {NOX_val}, {VOC_jump}, {NOX_jump},,")
-        data_file.write(f"{ECG_ACC_timestamp}, {ECG_heart_rate}, {X_acc}, {Y_acc}, {Z_acc}, {Movement}\n")
-
-        sleep(min(TH_sampling_rate, PPG_sampling_rate, VOC_sampling_rate, ECG_ACC_sampling_rate))
-
-    data_file.close()
-
 async def async_main_th(device):
     await asyncio.gather(BLErx_temp(device))
 
@@ -297,6 +174,96 @@ def init_ble_threads(devices):
     ecg_acc_thread.start()
 
 
+
+# ==================== Data Ploting and Data recording ====================
+
+# General Values
+x_num_of_seconds = 15
+temp_x_num_of_samples = round(x_num_of_seconds / TH_sampling_rate)
+
+#Temperature and Humidity values
+tempSamples = [0]*temp_x_num_of_samples
+humidSamples = [0]*temp_x_num_of_samples
+# tempTimeSamples = list(range(0, x_num_of_seconds, TH_sampling_rate))
+tempTimeSamples = [0]*temp_x_num_of_samples
+
+#PPG and ECG values
+
+ppg_x_num_of_samples = round(x_num_of_seconds / PPG_sampling_rate)
+ppgHrSamples = [0]*ppg_x_num_of_samples
+
+
+
+# This function is called periodically from FuncAnimation
+def animate(i,data_file, Temp_Line, Humid_Line, temp_ax, humid_ax):
+
+    global tempSamples, humidSamples, tempTimeSamples
+
+    # Add y to list
+    tempSamples.append(Temp)
+    humidSamples.append(Humid)
+    tempTimeSamples.append(th_timestamp/1000) #shows in seconds
+
+    # Limit y list to set number of items
+    tempSamples = tempSamples[-temp_x_num_of_samples:]
+    humidSamples = humidSamples[-temp_x_num_of_samples:]
+    tempTimeSamples = tempTimeSamples[-temp_x_num_of_samples:]
+
+    # Update line with new Y values
+    Temp_Line.set_ydata(tempSamples)
+    Temp_Line.set_xdata(tempTimeSamples)
+    
+    Humid_Line.set_ydata(humidSamples)
+    Humid_Line.set_xdata(tempTimeSamples)
+
+
+    temp_ax.set_xlim (min(tempTimeSamples) - 0.01, max(tempTimeSamples) + 0.01)
+    humid_ax.set_xlim(min(tempTimeSamples) - 0.01, max(tempTimeSamples) + 0.01)
+    
+    temp_ax.set_ylim (min(tempSamples)  - 2, max(tempSamples)  + 2)
+    humid_ax.set_ylim(min(humidSamples) - 3, max(humidSamples) + 2)
+
+
+    data_file.write(f"{th_timestamp}, {Temp}, {Humid},,")
+    data_file.write(f"{PPG_timestamp}, {HR_val}, {SpO2_val},,")
+    data_file.write(f"{VOC_timestamp}, {VOC_val}, {NOX_val}, {VOC_jump}, {NOX_jump},,")
+    data_file.write(f"{ECG_ACC_timestamp}, {ECG_heart_rate}, {X_acc}, {Y_acc}, {Z_acc}, {Movement}\n")
+
+    return Temp_Line, Humid_Line
+
+def record_and_plot ():
+
+    data_file = open("Data/multinodal_readout.csv", "w")
+
+    data_file.write("TH Timstamp, Temperature, Humidity,,")
+    data_file.write("PPG Timestamp, HR, SpO2,,")
+    data_file.write("VOC Timestamp, VOC, NOX, VOC_jump, NOX_jump,,")
+    data_file.write("ECG_ACC Timestamp, HR, X_acc, Y_acc, Z_acc, Movement\n")
+
+    # ------ Initialize Plot ------
+    fig, ((temp_ax, voc_ax), (hr_ax, jump_ax)) = plt.subplots(2, 2, figsize=(12, 7))
+    fig.suptitle("Sensor Data Readout")
+
+
+    # ---- Temperature and Humidity ----
+    Temp_Line, = temp_ax.plot(tempTimeSamples, tempSamples, color='blue', label="Temperature")
+    humid_ax = temp_ax.twinx()
+    Humid_Line, = humid_ax.plot(tempTimeSamples, humidSamples, color='red', label="Humidity")
+
+    temp_ax.set_title("Temperature and Humidity")
+    temp_ax.set_xlabel("Time (s)")
+    temp_ax.set_ylabel("Temperature (C)")
+    humid_ax.set_ylabel("Humidity (%)")
+
+    ani = animation.FuncAnimation(fig,
+        animate,
+        fargs=(data_file, Temp_Line, Humid_Line, temp_ax, humid_ax),
+        interval=200,
+        blit=False)
+    plt.show()
+
+    # data_file.close()
+
 if __name__ == "__main__":
     # start_ploting()
     th_device  = asyncio.run(BLEconnect(THName))
@@ -305,6 +272,8 @@ if __name__ == "__main__":
     ecg_acc_device = asyncio.run(BLEconnect(ECG_ACCName))
 
     init_ble_threads(devices=[th_device, ppg_device, voc_device, ecg_acc_device])
+    # th_thread = threading.Thread(target=async_entry_th, args=(th_device,))
+    # th_thread.start()
 
     record_and_plot()
-    # plot()
+    
