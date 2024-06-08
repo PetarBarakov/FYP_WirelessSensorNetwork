@@ -359,7 +359,7 @@ def record_and_plot ():
     temp_ax.set_ylabel("Temperature (C)")
     humid_ax.set_ylabel("Humidity (%)")
 
-    plt.legend([Temp_Line, Humid_Line], ['Temperature', 'Humidity'])
+    plt.legend([Temp_Line, Humid_Line], ['Temperature', 'Humidity'], loc='upper left')
 
     # ---- HR and SpO2 ----
     PPG_HR_Line, = hr_ax.plot(ppgTimeSamples, ppgHrSamples, color='blue', label="PPG HR")
@@ -371,7 +371,7 @@ def record_and_plot ():
     hr_ax.set_xlabel("Time (s)")
     hr_ax.set_ylabel("Heart Rate (bpm)")
     spo2_ax.set_ylabel("Oxygen Level (%)")
-    plt.legend([PPG_HR_Line, SpO2_Line, ECG_HR_Line], ['PPG HR', 'SpO2', 'ECG HR'])
+    plt.legend([PPG_HR_Line, SpO2_Line, ECG_HR_Line], ['PPG HR', 'SpO2', 'ECG HR'], loc='upper left')
 
     # ---- VOC and NOX ----
     VOC_Line, = voc_ax.plot(vocTimeSamples, vocSamples, color='blue', label="VOC")
@@ -383,7 +383,7 @@ def record_and_plot ():
     voc_ax.set_ylabel("VOC (raw)")
     nox_ax.set_ylabel("NOX (raw)")
 
-    plt.legend([VOC_Line, NOX_Line], ['VOC', 'NOX'])
+    plt.legend([VOC_Line, NOX_Line], ['VOC', 'NOX'], loc='upper left')
 
     # ---- VOC and NOX Jumps ----
     VOC_jump_Line, = jump_ax.plot(vocTimeSamples, vocJumpSamples, color='blue', label="VOC Jump")
@@ -394,7 +394,7 @@ def record_and_plot ():
     jump_ax.set_xlabel("Time (s)")
     jump_ax.set_ylabel("Jump (True/False)")
 
-    plt.legend([VOC_jump_Line, NOX_jump_Line, mov_jump_Line], ['VOC Jump', 'NOX Jump', 'Movement'])
+    jump_ax.legend([VOC_jump_Line, NOX_jump_Line, mov_jump_Line], ['VOC Jump', 'NOX Jump', 'Movement'], loc='upper left' )
 
 
     ani = animation.FuncAnimation(fig,
@@ -421,14 +421,14 @@ def record_and_plot ():
 
 if __name__ == "__main__":
     # start_ploting()
-    # th_device  = asyncio.run(BLEconnect(THName))
-    # ppg_device = asyncio.run(BLEconnect(PPGName))
-    # voc_device = asyncio.run(BLEconnect(VOCName))
+    th_device  = asyncio.run(BLEconnect(THName))
+    ppg_device = asyncio.run(BLEconnect(PPGName))
+    voc_device = asyncio.run(BLEconnect(VOCName))
     ecg_acc_device = asyncio.run(BLEconnect(ECG_ACCName))
 
-    # init_ble_threads(devices=[th_device, ppg_device, voc_device, ecg_acc_device])
-    test_thread = threading.Thread(target=async_entry_ecg_acc, args=(ecg_acc_device,))
-    test_thread.start()
+    init_ble_threads(devices=[th_device, ppg_device, voc_device, ecg_acc_device])
+    # test_thread = threading.Thread(target=async_entry_ecg_acc, args=(ecg_acc_device,))
+    # test_thread.start()
 
     record_and_plot()
     
