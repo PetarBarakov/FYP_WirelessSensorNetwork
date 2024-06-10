@@ -421,14 +421,14 @@ def record_and_plot ():
 
 if __name__ == "__main__":
     # start_ploting()
-    th_device  = asyncio.run(BLEconnect(THName))
-    ppg_device = asyncio.run(BLEconnect(PPGName))
+    # th_device  = asyncio.run(BLEconnect(THName))
+    # ppg_device = asyncio.run(BLEconnect(PPGName))
     voc_device = asyncio.run(BLEconnect(VOCName))
-    ecg_acc_device = asyncio.run(BLEconnect(ECG_ACCName))
+    # ecg_acc_device = asyncio.run(BLEconnect(ECG_ACCName))
 
-    init_ble_threads(devices=[th_device, ppg_device, voc_device, ecg_acc_device])
-    # test_thread = threading.Thread(target=async_entry_ecg_acc, args=(ecg_acc_device,))
-    # test_thread.start()
+    # init_ble_threads(devices=[th_device, ppg_device, voc_device, ecg_acc_device])
+    test_thread = threading.Thread(target=async_entry_voc, args=(voc_device,))
+    test_thread.start()
 
     record_and_plot()
     

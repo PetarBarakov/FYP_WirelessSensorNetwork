@@ -7,10 +7,10 @@
 
 #ifdef ESP32_SENSORS_MEASUREMENT
 
-// #define PROGRAM_TRH_SENSOR
+#define PROGRAM_TRH_SENSOR
 // #define PROGRAM_PPG_SENSOR
 // #define PROGRAM_VOC_SENSOR
-#define PROGRAM_ACC_ECG_SENSOR
+// #define PROGRAM_ACC_ECG_SENSOR
 
 // ============= END OF PROGRAMING CONFIGURATION =============
 
@@ -74,7 +74,7 @@ void setup() {
 
   //Iniitalise PPG Sensor
   #ifdef PROGRAM_PPG_SENSOR
-  PPGSensor.init( (uint8_t) 8,                //sampleAverage
+  PPGSensor.init( (uint8_t) 16,                //sampleAverage
                   (uint8_t) 1,                //mode
                   (uint8_t) 20,                //typCurrent [mA]
                   (uint8_t) 0b10,             //SpO2ADCRange corresponding to bits
@@ -212,7 +212,7 @@ void loop() {
   if((millis() - ECGsampleTimeStamp >= 1000) || movementDetected) 
   {
     ECGsampleTimeStamp = millis();
-    Serial.printf("ECG_HR: %d \t Filtered: %d \n", ecgHR, ecg_data_filtered);
+    Serial.printf("ECG_HR: %d \t ECG_RAW: %d \t Filtered: %d \n", ecgHR, s32_ch1_data, ecg_data_filtered);
     Serial.printf("X: %f \t Y: %f \t Z: %f \t Movement: %d\n", xAccel, yAccel, zAccel, movementDetected);
 
 
