@@ -276,8 +276,21 @@ def animate(i,data_file,
     ECG_HR_Line.set_ydata(ecgHrSamples)
     ECG_HR_Line.set_xdata(ecgAccTimeSamples)
 
-    hr_ax.set_xlim (min(ppgTimeSamples) - 0.01, max(ppgTimeSamples) + 0.01)
-    spo2_ax.set_xlim(min(ppgTimeSamples) - 0.01, max(ppgTimeSamples) + 0.01)
+    combined_time = ppgTimeSamples + ecgAccTimeSamples
+    lower_lim_hr = max(min(ppgTimeSamples), min(ecgAccTimeSamples))
+    higher_lim_hr = min(max(ppgTimeSamples), max(ecgAccTimeSamples))
+
+
+    ########################
+    # lower_lim_hr = min(ppgTimeSamples)
+    # higher_lim_hr = max(ppgTimeSamples)
+
+
+    hr_ax.set_xlim (lower_lim_hr - 0.01, higher_lim_hr + 0.01)
+    # hr_ax.set_xlim (PPG_timestamp/1000 - x_num_of_seconds, PPG_timestamp/1000)
+    # hr_ax.set_xlim (min(ecgAccTimeSamples) - 0.01, max(ecgAccTimeSamples) + 0.01)
+    spo2_ax.set_xlim(lower_lim_hr - 0.01, higher_lim_hr + 0.01)
+    # spo2_ax.set_xlim(min(ecgAccTimeSamples) - 0.01, max(ecgAccTimeSamples) + 0.01)
     hr_ax.set_ylim (0, 150)
     spo2_ax.set_ylim(20, 110)
 
@@ -321,7 +334,12 @@ def animate(i,data_file,
     mov_jump_Line.set_ydata(movJumpSamples)
     mov_jump_Line.set_xdata(ecgAccTimeSamples)
 
-    jump_ax.set_xlim (min(vocTimeSamples) - 0.01, max(vocTimeSamples) + 0.01)
+    # jump_ax.set_xlim (min(vocTimeSamples) - 0.01, max(vocTimeSamples) + 0.01)
+    
+    lower_lim = max(min(vocTimeSamples), min(ecgAccTimeSamples))
+    higher_lim = min(max(vocTimeSamples), max(ecgAccTimeSamples))
+
+    jump_ax.set_xlim (lower_lim- 0.01, higher_lim + 0.01)
     jump_ax.set_ylim (-1, 2)
 
     #===========================================
@@ -367,11 +385,12 @@ def record_and_plot ():
     SpO2_Line, = spo2_ax.plot(ppgTimeSamples, ppgSpO2Samples, color='red', label="SpO2")
     ECG_HR_Line, = hr_ax.plot(ecgAccTimeSamples, ecgHrSamples, color='green', label="ECG HR")
 
-    hr_ax.set_title("Hear Rate and Oxygen Level (SpO2)")
+    hr_ax.set_title("Heart Rate and Oxygen Level (SpO2)")
     hr_ax.set_xlabel("Time (s)")
     hr_ax.set_ylabel("Heart Rate (bpm)")
     spo2_ax.set_ylabel("Oxygen Level (%)")
     plt.legend([PPG_HR_Line, SpO2_Line, ECG_HR_Line], ['PPG HR', 'SpO2', 'ECG HR'], loc='upper left')
+    # plt.legend([PPG_HR_Line, SpO2_Line], ['PPG HR', 'SpO2'], loc='upper left')
 
     # ---- VOC and NOX ----
     VOC_Line, = voc_ax.plot(vocTimeSamples, vocSamples, color='blue', label="VOC")
@@ -422,12 +441,12 @@ def record_and_plot ():
 if __name__ == "__main__":
     # start_ploting()
     # th_device  = asyncio.run(BLEconnect(THName))
-    # ppg_device = asyncio.run(BLEconnect(PPGName))
-    voc_device = asyncio.run(BLEconnect(VOCName))
+    ppg_device = asyncio.run(BLEconnect(PPGName))
+    # voc_device = asyncio.run(BLEconnect(VOCName))
     # ecg_acc_device = asyncio.run(BLEconnect(ECG_ACCName))
 
     # init_ble_threads(devices=[th_device, ppg_device, voc_device, ecg_acc_device])
-    test_thread = threading.Thread(target=async_entry_voc, args=(voc_device,))
+    test_thread = threading.Thread(target=async_entry_ppg, args=(ppg_device,))
     test_thread.start()
 
     record_and_plot()

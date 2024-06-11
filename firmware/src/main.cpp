@@ -7,8 +7,8 @@
 
 #ifdef ESP32_SENSORS_MEASUREMENT
 
-#define PROGRAM_TRH_SENSOR
-// #define PROGRAM_PPG_SENSOR
+// #define PROGRAM_TRH_SENSOR
+#define PROGRAM_PPG_SENSOR
 // #define PROGRAM_VOC_SENSOR
 // #define PROGRAM_ACC_ECG_SENSOR
 
@@ -213,8 +213,7 @@ void loop() {
   {
     ECGsampleTimeStamp = millis();
     Serial.printf("ECG_HR: %d \t ECG_RAW: %d \t Filtered: %d \n", ecgHR, s32_ch1_data, ecg_data_filtered);
-    Serial.printf("X: %f \t Y: %f \t Z: %f \t Movement: %d\n", xAccel, yAccel, zAccel, movementDetected);
-
+    // Serial.printf("X: %f \t Y: %f \t Z: %f \t Movement: %d\n", xAccel, yAccel, zAccel, movementDetected);
 
     char ECG_ACC_message[64];
     sprintf(ECG_ACC_message, "%d,%d,%f,%f,%f,%d", ECGsampleTimeStamp, ecgHR, xAccel, yAccel, zAccel, movementDetected);
