@@ -271,72 +271,61 @@ void setup() {
 }
 
 void loop() {
-  // I2CSearchAddr();
-  // double shuntVoltage = 0;
-  // uint32_t busVoltage = 0;
-  // uint32_t power = 0;
-  // double current = 0;
 
-  // InputCurrentSense.readShuntVoltage(shuntVoltage);
-  // InputCurrentSense.readBusVoltage(busVoltage);
-  // InputCurrentSense.readPower(power);
-  // InputCurrentSense.readCurrent(current);
+  //---------------- Input Measurements ------------------
+  double input_current = 0;
+  double input_busVoltage = 0;
+  double input_shuntVoltage = 0;
 
-  // Serial.println("-------------Input Current Sensor:--------------");
-  // Serial.printf("Shunt Voltage: %f\n", shuntVoltage);
-  // Serial.printf("Bus Voltage: %d\n", busVoltage);
-  // Serial.printf("Power: %d\n", power);
-  // Serial.printf("Current: %f\n", current);
-  // Serial.println("-----------------------------------------------");
-  // Serial.println();
+  InputCurrentSense.readBusVoltage(input_busVoltage);
+  InputCurrentSense.readShuntVoltage(input_shuntVoltage);
 
-  // PPGCurrentSense.readShuntVoltage(shuntVoltage);
-  // PPGCurrentSense.readBusVoltage(busVoltage);
-  // PPGCurrentSense.readPower(power);
-  // PPGCurrentSense.readCurrent(current);
+  input_current = input_shuntVoltage / INPUT_CURRENT_SENSE_RESISTANCE;
+  input_current = input_current * 1000; //Convert to mA
 
-  // Serial.println("-------------PPG Current Sensor:--------------");
-  // Serial.printf("Shunt Voltage: %f\n", shuntVoltage);
-  // Serial.printf("Bus Voltage: %d\n", busVoltage);
-  // Serial.printf("Power: %d\n", power);
-  // Serial.printf("Current: %f\n", current);
-  // Serial.println("-----------------------------------------------");
-  // Serial.println();
+  // ------------------ ESP Measurements ------------------
 
+  double esp_current = 0;
+  double esp_busVoltage = 0;
+  double esp_shuntVoltage = 0;
 
-  double shuntVoltage = 0;
-  double busVoltage_1 = 0;
-  int32_t current_1 = 0;
-  uint32_t power = 0;
+  ESPCurrentSense.readBusVoltage(esp_busVoltage);
+  ESPCurrentSense.readShuntVoltage(esp_shuntVoltage);
+
+  esp_current = esp_shuntVoltage / ESP_CURRENT_SENSE_RESISTANCE;
+  esp_current = esp_current * 1000; //Convert to mA
+
+  //----------------- Sensor Measurement ------------------
+  double sensor_current = 0;
+  double sensor_busVoltage = 0;
+  double sensor_shuntVoltage = 0;
+
+  SensorsCurrentSense.readBusVoltage(sensor_busVoltage);
+  SensorsCurrentSense.readShuntVoltage(sensor_shuntVoltage);
+
+  sensor_current = sensor_shuntVoltage / SENSORS_CURRENT_SENSE_RESISTANCE;
+  sensor_current = sensor_current * 1000; //Convert to mA
 
 
-  ESPCurrentSense.readShuntVoltage(shuntVoltage);
-  ESPCurrentSense.readBusVoltage(busVoltage_1);
-  ESPCurrentSense.readPower(power);
-  ESPCurrentSense.readCurrent(current_1);
+  //----------------- PPG Measurement ------------------
+  double ppg_current = 0;
+  double ppg_busVoltage = 0;
+  double ppg_shuntVoltage = 0;
 
-  Serial.println("-------------ESP Current Sensor:--------------");
-  Serial.printf("Shunt Voltage: %f\n", shuntVoltage);
-  Serial.printf("Bus Voltage: %f\n", busVoltage_1);
-  Serial.printf("Power: %d\n", power);
-  Serial.printf("Current: %d\n", current_1);
-  Serial.println("-----------------------------------------------");
-  Serial.println();
+  PPGCurrentSense.readBusVoltage(ppg_busVoltage);
+  PPGCurrentSense.readShuntVoltage(ppg_shuntVoltage);
 
-  // SensorsCurrentSense.readShuntVoltage(shuntVoltage);
-  // SensorsCurrentSense.readBusVoltage(busVoltage_1);
-  // SensorsCurrentSense.readPower(power);
-  // SensorsCurrentSense.readCurrent(current_1);
+  ppg_current = ppg_shuntVoltage / PPG_CURRENT_SENSE_RESISTANCE;
+  ppg_current = ppg_current * 1000; //Convert to mA
 
-  // Serial.println("-------------Sensors Current Sensor:--------------"); 
-  // Serial.printf("Shunt Voltage: %f\n", shuntVoltage);
-  // Serial.printf("Bus Voltage: %fm\n", busVoltage_1);
-  // Serial.printf("Power: %d\n", power);
-  // Serial.printf("Current: %f\n", current_1);
-  // Serial.println("-----------------------------------------------");
-  // Serial.println();
-  
-  delay(2000);
+  //---------------- Print Measurements ----------------
+  Serial.printf("I_in: %f , V_in: %f , ", input_current, input_busVoltage);
+  Serial.printf("I_esp: %f , V_esp: %f , ", esp_current, esp_busVoltage);
+  Serial.printf("I_sens: %f , V_sens: %f , ", sensor_current, sensor_busVoltage);
+  Serial.printf("I_ppg: %f , V_ppg: %f\n", ppg_current, ppg_busVoltage);
+
+  // Serial.printf("I_in: %f \t V_in: %f \t I_esp: %f \t V_esp: %f\n", input_current, input_busVoltage, esp_current, esp_busVoltage);
+  delay(10);
 }
 
 #endif // ESP32_POWER_MEASUREMENT
