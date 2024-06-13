@@ -9,8 +9,8 @@ void INA236::init(bool adcRange, uint16_t sampleAverage, uint16_t shuntResistanc
     configure(adcRange, sampleAverage);
     calibrate(shuntResistanceVal);
 
-    if(adcRange == 0) resolution = 2.5;
-    if(adcRange == 1) resolution = 0.625;
+    if(adcRange == 0) resolution = 2.5 / 1000;
+    if(adcRange == 1) resolution = 0.625 / 1000;
 }
 
 void INA236::readShuntVoltage(double &shuntVoltage)
@@ -19,18 +19,18 @@ void INA236::readShuntVoltage(double &shuntVoltage)
     uint8_t rxShuntRaw [2];
     readSensorBytes(rxShuntRaw, 2);
 
-    int16_t ShuntRawVoltage= (rxShuntRaw[1] << 8) | rxShuntRaw[0];
+    int16_t ShuntRawVoltage= (rxShuntRaw[0] << 8) | rxShuntRaw[1];
     
-    shuntVoltage = ShuntRawVoltage * resolution / 1000.0; //result in milivolts
+    shuntVoltage = double (ShuntRawVoltage * resolution); //result in milivolts
 }
 
-void INA236::readBusVoltage(uint32_t &busVoltage)
+void INA236::readBusVoltage(double &busVoltage)
 {
     writeSensor1Byte(INA236_BUSVOLTAGE_REG);
     uint8_t rxBusRaw [2];
     readSensorBytes(rxBusRaw, 2);
 
-    busVoltage = (rxBusRaw[1] << 8) | rxBusRaw[0];
+    busVoltage = (double) (((uint32_t)(rxBusRaw[0] << 8) | rxBusRaw[1]) * 1.6e-3);
 }
 
 void INA236::readPower(uint32_t &power)
@@ -39,7 +39,7 @@ void INA236::readPower(uint32_t &power)
     uint8_t rxPowerRaw [2];
     readSensorBytes(rxPowerRaw, 2);
 
-    power = (rxPowerRaw[1] << 8) | rxPowerRaw[0];
+    power = (rxPowerRaw[0] << 8) | rxPowerRaw[1];
 }
 
 void INA236::readCurrent(double &current)
@@ -48,9 +48,8 @@ void INA236::readCurrent(double &current)
     uint8_t rxCurrentRaw [2];
     readSensorBytes(rxCurrentRaw, 2);
 
-    int16_t CurrentRaw= (rxCurrentRaw[1] << 8) | rxCurrentRaw[0];
+    current = (double) ( (int32_t) ( (rxCurrentRaw[0] << 8) | rxCurrentRaw[1]) * resolution );
     
-    current = CurrentRaw / 1.0; //result in milivolts
 }
 
 void INA236::configure(bool adcRange, uint16_t sampleAverage)

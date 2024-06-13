@@ -34,7 +34,7 @@ class INA228 : public Sensor
     void readShuntVoltage(double &shuntVoltage);
     void readBusVoltage(double &busVoltage);
     void readPower(uint32_t &power);
-    void readCurrent(int32_t &current);
+    void readCurrent(double &current);
 
     private:
     void reset();

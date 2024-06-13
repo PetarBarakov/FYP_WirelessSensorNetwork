@@ -16,8 +16,8 @@ void INA228::init(bool adcRange, uint16_t sampleAverage, uint16_t shuntResistanc
         1b     -->      +-40.96 mV
     */
 
-    if(adcRange ==0) resolution = 163.84;
-    else resolution = 40.96;
+    if(adcRange ==0) resolution = 312.5 / 1e6;
+    else resolution = 78.125 / 1e6;
 
     uint8_t txBuffer [2];
     txBuffer[0] = 0x00 | adcRange << 4; 
@@ -104,11 +104,11 @@ void INA228::readShuntVoltage(double &shuntVoltage)
     uint8_t rxBuffer [3];
     readSensorBytes(rxBuffer, 3);
 
-    int32_t ShuntRawVoltage = rxBuffer[2] << 16 | rxBuffer[1] << 8 | rxBuffer[0];
+    int32_t ShuntRawVoltage = rxBuffer[0] << 16 | rxBuffer[1] << 8 | rxBuffer[2];
     ShuntRawVoltage = ShuntRawVoltage >> 4;
     if (ShuntRawVoltage & 0x80000) ShuntRawVoltage = ShuntRawVoltage | 0xFFF00000;
 
-    shuntVoltage = ShuntRawVoltage * resolution / 1000.0; //result in milivolts
+    shuntVoltage = ShuntRawVoltage * resolution; //result in milivolts
 }
 
 void INA228::readBusVoltage(double &busVoltage)
@@ -117,12 +117,12 @@ void INA228::readBusVoltage(double &busVoltage)
     uint8_t rxBuffer [3];
     readSensorBytes(rxBuffer, 3);
 
-    int32_t BusRawVoltage = rxBuffer[2] << 16 | rxBuffer[1] << 8 | rxBuffer[0];
+    int32_t BusRawVoltage = rxBuffer[0] << 16 | rxBuffer[1] << 8 | rxBuffer[2];
     BusRawVoltage = BusRawVoltage >> 4;
 
     if (BusRawVoltage & 0x80000) BusRawVoltage = BusRawVoltage | 0xFFF00000;
 
-    busVoltage = BusRawVoltage * 195.3125 / 1000.0; //result in milivolts
+    busVoltage = (double) BusRawVoltage * 195.3125 / 1e6; //result in milivolts
 }
 
 void INA228::readPower(uint32_t &power)
@@ -130,22 +130,22 @@ void INA228::readPower(uint32_t &power)
     writeSensor1Byte(INA228_POWER_REG);
     uint8_t rxBuffer [3];
 
-    uint32_t powerRaw = rxBuffer[2] << 16 | rxBuffer[1] << 8 | rxBuffer[0];
+    uint32_t powerRaw = rxBuffer[0] << 16 | rxBuffer[1] << 8 | rxBuffer[2];
     power = powerRaw;
 }
 
-void INA228::readCurrent(int32_t &current)
+void INA228::readCurrent(double &current)
 {
     writeSensor1Byte(INA228_CURRENT_REG);
     uint8_t rxBuffer [3];
     readSensorBytes(rxBuffer, 3);
 
-    int32_t CurrentRaw = rxBuffer[2] << 16 | rxBuffer[1] << 8 | rxBuffer[0];
+    int32_t CurrentRaw = rxBuffer[0] << 16 | rxBuffer[1] << 8 | rxBuffer[2];
     CurrentRaw = CurrentRaw >> 4;
     if (CurrentRaw & 0x80000) CurrentRaw = CurrentRaw | 0xFFF00000;
     
 
-    current = CurrentRaw * 195.3125 / 1000.0; //result in milivolts
+    current = (double) CurrentRaw * resolution; //result in milivolts
 }
 
 void INA228::reset()
