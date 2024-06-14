@@ -1,0 +1,10 @@
+Output: PPG_CPL
+Type  : Pick Place
+From  : Variant [V1] of PCB Document [PPG_Board.PcbDoc]
+   Generated File[Pick Place for PPG_Board(V1).csv]
+
+
+Files Generated   : 1
+Documents Printed : 0
+
+Finished Output Generation At 12:33:34 On 25/05/2024

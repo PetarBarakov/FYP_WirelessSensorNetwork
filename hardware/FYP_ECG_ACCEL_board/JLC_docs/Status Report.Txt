@@ -1,0 +1,10 @@
+Output: ECG_ACC_CPL
+Type  : Pick Place
+From  : Variant [V1] of PCB Document [ECG_ACCEL_Board.PcbDoc]
+   Generated File[Pick Place for ECG_ACCEL_Board(V1).csv]
+
+
+Files Generated   : 1
+Documents Printed : 0
+
+Finished Output Generation At 11:55:32 On 25/05/2024

@@ -1,0 +1,22 @@
+------------------------------------------------------------------------------------------
+Gerber File Extension Report For: ECG_ACCEL_Board.GBR   25/05/2024  11:55:25
+------------------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------------------
+Layer Extension     Layer Description                      
+------------------------------------------------------------------------------------------
+.GTL                Top Layer                               
+.G1                 Int1 (GND)                              
+.G2                 Int2 (PWR)                              
+.GBL                Bottom Layer                            
+.GTO                Top Overlay                             
+.GBO                Bottom Overlay                          
+.GTS                Top Solder                              
+.GBS                Bottom Solder                           
+.GTP                Top Paste                               
+.GBP                Bottom Paste                            
+.GM                 Profile                                 
+.GBR1               Non-plated through-hole drill file      
+.GBR2               Plated through-hole drill file          
+------------------------------------------------------------------------------------------
