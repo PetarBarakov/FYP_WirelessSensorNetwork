@@ -325,7 +325,7 @@ void loop() {
   Serial.printf("I_ppg: %f , V_ppg: %f\n", ppg_current, ppg_busVoltage);
 
   // Serial.printf("I_in: %f \t V_in: %f \t I_esp: %f \t V_esp: %f\n", input_current, input_busVoltage, esp_current, esp_busVoltage);
-  delay(10);
+  delayMicroseconds(100);
 }
 
 #endif // ESP32_POWER_MEASUREMENT
